@@ -32,14 +32,31 @@ float noise(float seed) {
   return mix(rand(i), rand(i + 1.0), smoothstep(0.,1.,f));
 }
 
+mat2 rotate2d(float theta)
+{
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat2(
+        c, -s,
+        s, c
+    );
+}
+
+vec2 CENTER = vec2(0.5, 0.5);
+
 void main()
 {
     vec2 uv = gl_FragCoord.xy/resolution;
+    uv -= vec2(CENTER);
+    uv = rotate2d(2*PI*noise(bassMagnitude)*time/20.0)*uv;
+    uv += vec2(CENTER);
     vec2 texCoord = gl_FragCoord.xy / textureSize; // Normalize to [0, 1]
                                                        //
 
-    float sampleValue = texture(texture3, vec2(uv.x, 0.5)).r;  // Accessing the red channel which contains our sample data
-    vec3 color = vec3(0.8, 0.0, 0.7);
+    float sampleValue = texture(texture3, vec2((noise(time))*80.0*uv.x, 0.5)).r;  // Accessing the red channel which contains our sample data
+    //uv -= vec2(sin(time)/2.0, sampleValue/2.0);
+    float soundwaveValue=1.0-smoothstep(length(sampleValue*uv), 0.15, 0.2);
+    vec3 color = vec3(sampleValue, 0.0, rand(sampleValue));
 
-    gl_FragColor = vec4(bassMagnitude*color, 1.0);
+    gl_FragColor = vec4(30.0*bassMagnitude*bassMagnitude*color*soundwaveValue, 1.0);
 }

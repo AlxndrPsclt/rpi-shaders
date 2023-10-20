@@ -110,7 +110,7 @@ int main(void)
     SetShaderValue(shader, resolutionLoc, resolution, SHADER_UNIFORM_VEC2);
 
     float totalTime = 0.0f;
-    bool shaderAutoReloading = false;
+    bool shaderAutoReloading = true;
 
     SetTargetFPS(60);                       // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -149,17 +149,12 @@ int main(void)
         return -3;
     }
 
-    //Image image = LoadImageFromTexture(audioTexture);
-    //float* pixelData = (float*)image.data;
-    printf("Samples: %f %f %f %f\n", audioSamples[551], audioSamples[552], audioSamples[553], audioSamples[554]);
-    //printf("Pixels:  %f %f %f %f\n", pixelData[551], pixelData[552], pixelData[553], pixelData[554]);
 
-    // Main game loop
+    // Main visualization loop
     while (!WindowShouldClose())            // Detect window close button or ESC key
     {
         // Update
         //----------------------------------------------------------------------------------
-        //printf("%f\n", audioSamples[3]);
         totalTime += GetFrameTime();
         Vector2 mouse = GetMousePosition();
         float mousePos[2] = { mouse.x, mouse.y };
@@ -169,12 +164,8 @@ int main(void)
         SetShaderValue(shader, mouseLoc, mousePos, SHADER_UNIFORM_VEC2);
         SetShaderValue(shader, bassMagnitudeLoc, &bassMagnitude, SHADER_UNIFORM_FLOAT);
 
-        printf("%f\n", bassMagnitude);
+        //printf("%f\n", bassMagnitude);
         UpdateTexture(audioTexture, audioSamples);
-        //image = LoadImageFromTexture(audioTexture);
-        //pixelData = (float*)image.data;
-        //printf("Value: %f\n", pixelData[551]);
-
 
         // Hot shader reloading
         if (shaderAutoReloading || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)))
@@ -217,10 +208,10 @@ int main(void)
             // We only draw a white full-screen rectangle, frame is generated in shader
             BeginShaderMode(shader);
                 SetShaderValueTexture(shader, audioTextureLoc, audioTexture);
-                DrawRectangle(0, 0, screenWidth, screenHeight, WHITE);
+                DrawRectangle(0, 0, screenWidth, screenHeight, BLACK);
             EndShaderMode();
 
-            DrawText(TextFormat("Shader last modification: %s", asctime(localtime(&fragShaderFileModTime))), 10, 1040, 20, WHITE);
+            //DrawText(TextFormat("Shader last modification: %s", asctime(localtime(&fragShaderFileModTime))), 10, 1040, 20, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
