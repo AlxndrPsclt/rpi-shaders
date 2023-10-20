@@ -13,6 +13,7 @@ uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform sampler2D texture3;
 uniform vec2 textureSize;    // The dimensions of the texture
+uniform float bassMagnitude;
 
 
 const float PI = 3.1415926535897932384626433;
@@ -38,7 +39,7 @@ void main()
                                                        //
 
     float sampleValue = texture(texture3, vec2(uv.x, 0.5)).r;  // Accessing the red channel which contains our sample data
-    vec3 color = vec3(sampleValue, sampleValue, 0.0);
+    vec3 color = vec3(0.8, 0.0, 0.7);
 
-    gl_FragColor = vec4(1.0*color, 1.0);
+    gl_FragColor = vec4(bassMagnitude*color, 1.0);
 }

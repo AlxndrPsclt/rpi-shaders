@@ -16,6 +16,7 @@
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
+#include <fftw3.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -36,6 +37,17 @@
 float audioSamples[MAX_SAMPLES];
 unsigned int currentSampleIndex = 0;
 
+fftw_complex *fftResult;
+
+float bassMagnitude = 0.0f;
+
+void computeFFT(float *input, fftw_complex *output, int n)
+{
+    fftw_plan plan = fftw_plan_dft_r2c_1d(n, input, output, FFTW_ESTIMATE);
+    fftw_execute(plan);
+    fftw_destroy_plan(plan);
+}
+
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
     float* inputSamples = (float*)pInput;
@@ -43,6 +55,10 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
     {
         audioSamples[i] = (inputSamples[i]+ 1.0) * 0.5;
     }
+
+    computeFFT(audioSamples, fftResult, MAX_SAMPLES);
+
+    bassMagnitude = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
 
     (void)pOutput;
 }
@@ -57,6 +73,8 @@ int main(void)
     const int screenWidth = 1920;
     const int screenHeight = 1080;
 
+    fftResult = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * MAX_SAMPLES);
+
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - hot reloading");
 
     const char *fragShaderFileName = "resources/shaders/glsl%i/myshader.glsl";
@@ -70,6 +88,7 @@ int main(void)
     int resolutionLoc = GetShaderLocation(shader, "resolution");
     int mouseLoc = GetShaderLocation(shader, "mouse");
     int timeLoc = GetShaderLocation(shader, "time");
+    int bassMagnitudeLoc = GetShaderLocation(shader, "bassMagnitude");
     int audioTextureLoc = GetShaderLocation(shader, "texture3");
 
     Texture2D audioTexture = { 0 };
@@ -84,6 +103,7 @@ int main(void)
     Vector2 textureSize = { (float)audioTexture.width, (float)audioTexture.height };
     int textureSizeLoc = GetShaderLocation(shader, "textureSize");
     SetShaderValue(shader, textureSizeLoc, &textureSize, SHADER_UNIFORM_VEC2);
+    SetShaderValue(shader, bassMagnitudeLoc, &bassMagnitude, SHADER_UNIFORM_FLOAT);
 
 
     float resolution[2] = { (float)screenWidth, (float)screenHeight };
@@ -147,9 +167,9 @@ int main(void)
         // Set shader required uniform values
         SetShaderValue(shader, timeLoc, &totalTime, SHADER_UNIFORM_FLOAT);
         SetShaderValue(shader, mouseLoc, mousePos, SHADER_UNIFORM_VEC2);
+        SetShaderValue(shader, bassMagnitudeLoc, &bassMagnitude, SHADER_UNIFORM_FLOAT);
 
-        printf("%f %f %f %f\n", audioSamples[551], audioSamples[552], audioSamples[553], audioSamples[554]);
-        printf("Texture ID: : %u", audioTexture.id);
+        printf("%f\n", bassMagnitude);
         UpdateTexture(audioTexture, audioSamples);
         //image = LoadImageFromTexture(audioTexture);
         //pixelData = (float*)image.data;
@@ -211,10 +231,12 @@ int main(void)
     UnloadShader(shader);           // Unload shader
     UnloadTexture(audioTexture);
 
+
     CloseWindow();                  // Close window and OpenGL context
 
     ma_device_uninit(&device);
     ma_encoder_uninit(&encoder);
+    fftw_free(fftResult);
     //--------------------------------------------------------------------------------------
 
     return 0;
