@@ -1,4 +1,5 @@
 /*******************************************************************************************
+*   SHADER 003
 *
 *   raylib [shaders] example - Hot reloading
 *
@@ -68,7 +69,7 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
     lowfreqs = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
     //printf("Audio %f\n", fftInput[2]);
     //printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
-    printf("FFT %f\n", lowfreqs);
+    //printf("FFT %f\n", lowfreqs);
 
     (void)pOutput;
 }

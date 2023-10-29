@@ -161,5 +161,5 @@ void main()
     vec3 freqsvec = vec3(lowfreqs);
 
     //gl_FragColor = vec4(4.0*color*BEAT4, 1.0);
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(6.0*color, 1.0);
 }
