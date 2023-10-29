@@ -33,7 +33,7 @@
 #endif
 
 //#define MAX_SAMPLES 44100 * 10   // For example, 10 seconds at 44100 Hz.
-#define MAX_SAMPLES 1102
+#define MAX_SAMPLES 1024
 int16_t audioSamples[MAX_SAMPLES];
 double fftInput[MAX_SAMPLES];
 float fftInputFloat[MAX_SAMPLES];
@@ -43,7 +43,7 @@ fftw_complex *fftResult;
 
 float lowfreqs = 0.0f;
 
-void computeFFT(double *input, fftw_complex *output, int n)
+void computeFFT(int n, double *input, fftw_complex *output)
 {
     fftw_plan plan = fftw_plan_dft_r2c_1d(n, input, output, FFTW_ESTIMATE);
     fftw_execute(plan);
@@ -54,6 +54,8 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
 {
     int16_t* inputSamples = (int16_t*)pInput;
 
+    //printf("FrameCount %u\n", frameCount);
+
     for(ma_uint32 i = 0; i < frameCount; i++)
     {
         audioSamples[i] = (inputSamples[i]);
@@ -61,12 +63,12 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
         fftInputFloat[i] = (float)fftInput[i];
     }
 
-    computeFFT(fftInput, fftResult, MAX_SAMPLES);
+    computeFFT(MAX_SAMPLES, fftInput, fftResult);
 
     lowfreqs = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
-    printf("Audio %f\n", fftInput[2]);
+    //printf("Audio %f\n", fftInput[2]);
     //printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
-    //printf("FFT %f\n", lowfreqs);
+    printf("FFT %f\n", lowfreqs);
 
     (void)pOutput;
 }

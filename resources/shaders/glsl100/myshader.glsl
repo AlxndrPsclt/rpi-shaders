@@ -9,12 +9,12 @@ const float MIC_AMPLIFICATION=10.0;
 
 const vec3 lineColor=vec3(0.5,0.1,2.0);
 
+uniform float lowfreqs;
 uniform sampler2D texture0;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform sampler2D texture3;
 uniform vec2 textureSize;    // The dimensions of the texture
-uniform float bassMagnitude;
 
 const float BPM=129.0;
 const float BPS = BPM/60.0;
@@ -123,7 +123,7 @@ void main()
 
     float lineSDF;
     for(float i = 0.0; i < 10.0; ++i) {
-      lineSDF = sdSegment( uv+sin(BEAT), vec2(-1.0,abs(sin((i+ctime)/6.0))), vec2(1.0,noise(uv.y)+abs(sin((i+ctime)/6.0))));
+      lineSDF = sdSegment( uv, vec2(-1.0,abs(sin((i+ctime)/6.0))), vec2(1.0,noise(uv.y)+abs(sin((i+ctime)/6.0))));
       nline += 1.0-smoothstep(0.002,0.0021,abs(lineSDF));
     }
     //float lineSDF2 = sdSegment( uv, vec2(-1.0,fract((0.6+time)/6.0)), vec2(1.0,fract((0.6+time)/6.0)));
@@ -153,8 +153,13 @@ void main()
     //color+=soundwaveValue;
     //color+=grid;
 
+    color*=lowfreqs;
+
     vec3 sound = vec3(sampleValue);
+    vec3 fft = vec3(0.6,0.1,0.8)*lowfreqs;
+
+    vec3 freqsvec = vec3(lowfreqs);
 
     //gl_FragColor = vec4(4.0*color*BEAT4, 1.0);
-    gl_FragColor = vec4(sound, 1.0);
+    gl_FragColor = vec4(color, 1.0);
 }
