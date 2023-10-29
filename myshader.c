@@ -34,13 +34,16 @@
 
 //#define MAX_SAMPLES 44100 * 10   // For example, 10 seconds at 44100 Hz.
 #define MAX_SAMPLES 1102
-float audioSamples[MAX_SAMPLES];
+int16_t audioSamples[MAX_SAMPLES];
+double fftInput[MAX_SAMPLES];
+float fftInputFloat[MAX_SAMPLES];
+
 
 fftw_complex *fftResult;
 
 float lowfreqs = 0.0f;
 
-void computeFFT(float *input, fftw_complex *output, int n)
+void computeFFT(double *input, fftw_complex *output, int n)
 {
     fftw_plan plan = fftw_plan_dft_r2c_1d(n, input, output, FFTW_ESTIMATE);
     fftw_execute(plan);
@@ -49,16 +52,21 @@ void computeFFT(float *input, fftw_complex *output, int n)
 
 void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
-    float* inputSamples = (float*)pInput; -g
+    int16_t* inputSamples = (int16_t*)pInput;
+
     for(ma_uint32 i = 0; i < frameCount; i++)
     {
-        audioSamples[i] = (inputSamples[i]+ 1.0) * 0.5;
+        audioSamples[i] = (inputSamples[i]);
+        fftInput[i] = ((32768.0+audioSamples[i]) / 65536.0);  // Convert to double and normalize
+        fftInputFloat[i] = (float)fftInput[i];
     }
 
-    computeFFT(audioSamples, fftResult, MAX_SAMPLES);
+    computeFFT(fftInput, fftResult, MAX_SAMPLES);
 
-    lowfreqs = sqrt(fftResult[10][0] * fftResult[10][0] + fftResult[10][1] * fftResult[10][1]);
-    //printf("%f\n", lowfreqs);
+    lowfreqs = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
+    printf("Audio %f\n", fftInput[2]);
+    //printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
+    //printf("FFT %f\n", lowfreqs);
 
     (void)pOutput;
 }
@@ -132,9 +140,9 @@ int main(void)
     }
 
     deviceConfig = ma_device_config_init(ma_device_type_capture);
-    deviceConfig.capture.format   = encoder.config.format;
-    deviceConfig.capture.channels = encoder.config.channels;
-    deviceConfig.sampleRate       = encoder.config.sampleRate;
+    deviceConfig.capture.format   = encoderConfig.format;
+    deviceConfig.capture.channels = encoderConfig.channels;
+    deviceConfig.sampleRate       = encoderConfig.sampleRate;
     deviceConfig.dataCallback     = audioDataCallback;
     deviceConfig.pUserData        = &encoder;
 
@@ -166,7 +174,7 @@ int main(void)
         SetShaderValue(shader, mouseLoc, mousePos, SHADER_UNIFORM_VEC2);
         SetShaderValue(shader, lowfreqsLoc, &lowfreqs, SHADER_UNIFORM_FLOAT);
 
-        UpdateTexture(audioTexture, audioSamples);
+        UpdateTexture(audioTexture, fftInputFloat);
 
         // Hot shader reloading
         if (shaderAutoReloading || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)))

@@ -5,6 +5,7 @@ precision mediump float;
 const float PI = 3.1415926535897932384626433;
 const float DEFAULT_RANDOM_FROM_FLOAT_PARAM = 502000.0;
 const vec2 DEFAULT_RANDOM_FROM_VEC2_PARAM = vec2(0.840,0.290);
+const float MIC_AMPLIFICATION=10.0;
 
 const vec3 lineColor=vec3(0.5,0.1,2.0);
 
@@ -95,7 +96,8 @@ void main()
     vec2 uv = gl_FragCoord.xy/resolution;
     vec2 position = vec2(mouse.x, resolution.y - mouse.y);
 
-    float sampleValue = texture2D(texture3, vec2(uv.x, 0.5)).r;  // Accessing the red channel which contains our sample data
+    float sampleValue = 0.5 + MIC_AMPLIFICATION*(texture2D(texture3, vec2(uv.x, 0.5)).r-0.5);
+    //float sampleValue = (texture2D(texture3, vec2(uv.x, 0.5)).r - 0.5)*20.0 + 0.5;  // Accessing the red channel which contains our sample data
     float soundwaveValue=1.0-smoothstep(length(sampleValue*uv), 0.15, 0.2);
                                                                                    //
     //float lineSDF = sdSegment( uv, vec2(-1.0,sin(0.5*PI*time)/2.0), vec2(1.0,-cos(0.5*PI*time)/2.0));
@@ -151,5 +153,8 @@ void main()
     //color+=soundwaveValue;
     //color+=grid;
 
-    gl_FragColor = vec4(4.0*color*BEAT4, 1.0);
+    vec3 sound = vec3(sampleValue);
+
+    //gl_FragColor = vec4(4.0*color*BEAT4, 1.0);
+    gl_FragColor = vec4(sound, 1.0);
 }
