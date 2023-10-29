@@ -35,11 +35,10 @@
 //#define MAX_SAMPLES 44100 * 10   // For example, 10 seconds at 44100 Hz.
 #define MAX_SAMPLES 1102
 float audioSamples[MAX_SAMPLES];
-unsigned int currentSampleIndex = 0;
 
 fftw_complex *fftResult;
 
-float bassMagnitude = 0.0f;
+float lowfreqs = 0.0f;
 
 void computeFFT(float *input, fftw_complex *output, int n)
 {
@@ -48,9 +47,9 @@ void computeFFT(float *input, fftw_complex *output, int n)
     fftw_destroy_plan(plan);
 }
 
-void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
+void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
-    float* inputSamples = (float*)pInput;
+    float* inputSamples = (float*)pInput; -g
     for(ma_uint32 i = 0; i < frameCount; i++)
     {
         audioSamples[i] = (inputSamples[i]+ 1.0) * 0.5;
@@ -58,7 +57,8 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
 
     computeFFT(audioSamples, fftResult, MAX_SAMPLES);
 
-    bassMagnitude = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
+    lowfreqs = sqrt(fftResult[10][0] * fftResult[10][0] + fftResult[10][1] * fftResult[10][1]);
+    //printf("%f\n", lowfreqs);
 
     (void)pOutput;
 }
@@ -88,7 +88,7 @@ int main(void)
     int resolutionLoc = GetShaderLocation(shader, "resolution");
     int mouseLoc = GetShaderLocation(shader, "mouse");
     int timeLoc = GetShaderLocation(shader, "time");
-    int bassMagnitudeLoc = GetShaderLocation(shader, "bassMagnitude");
+    int lowfreqsLoc = GetShaderLocation(shader, "lowfreqs");
     int audioTextureLoc = GetShaderLocation(shader, "texture3");
 
     Texture2D audioTexture = { 0 };
@@ -103,7 +103,7 @@ int main(void)
     Vector2 textureSize = { (float)audioTexture.width, (float)audioTexture.height };
     int textureSizeLoc = GetShaderLocation(shader, "textureSize");
     SetShaderValue(shader, textureSizeLoc, &textureSize, SHADER_UNIFORM_VEC2);
-    SetShaderValue(shader, bassMagnitudeLoc, &bassMagnitude, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(shader, lowfreqsLoc, &lowfreqs, SHADER_UNIFORM_FLOAT);
 
 
     float resolution[2] = { (float)screenWidth, (float)screenHeight };
@@ -122,7 +122,9 @@ int main(void)
     ma_device device;
 
 
-    encoderConfig = ma_encoder_config_init(ma_encoding_format_wav, ma_format_f32, 2, 44100);
+    //encoderConfig = ma_encoder_config_init(ma_encoding_format_wav, ma_format_f32, 2, 44100);
+    encoderConfig = ma_encoder_config_init(ma_encoding_format_wav, ma_format_s16, 1, 44100);    //PLATFORM RPI
+
 
     if (ma_encoder_init_file("/tmp/test.wav", &encoderConfig, &encoder) != MA_SUCCESS) {
         printf("Failed to initialize output file.\n");
@@ -133,7 +135,7 @@ int main(void)
     deviceConfig.capture.format   = encoder.config.format;
     deviceConfig.capture.channels = encoder.config.channels;
     deviceConfig.sampleRate       = encoder.config.sampleRate;
-    deviceConfig.dataCallback     = data_callback;
+    deviceConfig.dataCallback     = audioDataCallback;
     deviceConfig.pUserData        = &encoder;
 
     result = ma_device_init(NULL, &deviceConfig, &device);
@@ -162,9 +164,8 @@ int main(void)
         // Set shader required uniform values
         SetShaderValue(shader, timeLoc, &totalTime, SHADER_UNIFORM_FLOAT);
         SetShaderValue(shader, mouseLoc, mousePos, SHADER_UNIFORM_VEC2);
-        SetShaderValue(shader, bassMagnitudeLoc, &bassMagnitude, SHADER_UNIFORM_FLOAT);
+        SetShaderValue(shader, lowfreqsLoc, &lowfreqs, SHADER_UNIFORM_FLOAT);
 
-        //printf("%f\n", bassMagnitude);
         UpdateTexture(audioTexture, audioSamples);
 
         // Hot shader reloading
