@@ -72,6 +72,15 @@ float drawGrid( in vec2 p, in vec2 origin)
     return isPartOfTheGrid;
 }
 
+mat2 rotate2d(float theta)
+{
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat2(
+        c, -s,
+        s, c
+    );
+}
 // Input vertex attributes (from vertex shader)
 varying vec2 fragTexCoord;           // Texture coordinates (sampler2D)
 varying vec4 fragColor;              // Tint color
@@ -94,6 +103,8 @@ void main()
     float BEAT32 = fract(BEAT_VALUE * 0.03125);
 
     vec2 uv = gl_FragCoord.xy/resolution;
+    //uv = rotate2d(PI*noise(lowfreqs)/5.0)*uv;
+
     vec2 position = vec2(mouse.x, resolution.y - mouse.y);
 
     float sampleValue = 0.5 + MIC_AMPLIFICATION*(texture2D(texture3, vec2(uv.x, 0.5)).r-0.5);
@@ -111,6 +122,12 @@ void main()
     float scanLineSDF = sdSegment( uv/5.0, vec2(sin(0.08*PI*time/10.0)/2.0,-1.0), vec2(sin(0.06*PI*time/10.1)/2.0, 1.0));
     float scanline = 1.0-smoothstep(0.001,0.0011,abs(scanLineSDF));
 
+    float smoothLowfreqs = smoothstep(0.1,2.5,lowfreqs);
+    //float smoothLowfreqs2 = smoothstep(1.0,5.0,lowfreqs*(cos(time)+1.0)/2.0);
+    float possibleToShowWave = (smoothstep(0.2,0.4,noise(time))+0.05);
+    float smoothLowfreqs2 = smoothstep(1.0,5.0,lowfreqs*possibleToShowWave);
+
+
 
     //float lineSDF1 = sdSegment( uv+vec2(0.0,0.15), vec2(-1.0,sin((0.05+noise(bassMagnitude)/1000.0)*PI*time)/2.0), vec2(1.0,sin((0.06+noise(6.0*bassMagnitude)/1000.0)*PI*time)/2.0));
     //float lineSDF2 = sdSegment( uv+vec2(0.0,0.3), vec2(-1.0,sin((0.05+noise(2.0*bassMagnitude)/1000.0)*PI*time)/2.0), vec2(1.0,sin((0.09+noise(5.0*bassMagnitude)/1000.0)*PI*time)/2.0));
@@ -119,11 +136,20 @@ void main()
     //float lineSDF5 = sdSegment( uv-vec2(0.0,0.3), vec2(-1.0,sin((0.09+noise(5.0 * bassMagnitude)/1000.0)*PI*time)/2.0), vec2(1.0,sin((0.05+noise(2.0*bassMagnitude)/1000.0)*PI*time)/2.0));
     //float lineSDF6 = sdSegment( uv-vec2(0.0,0.45), vec2(-1.0,sin((0.06+noise(6.0*bassMagnitude)/1000.0)*PI*time)/2.0), vec2(1.0,sin((0.05+noise(bassMagnitude)/1000.0)*PI*time)/2.0));
     //
-    float ctime = time/10.0;
+    float ctime = time*0.1+smoothLowfreqs2;
+    float fastime = time*15.0;
 
     float lineSDF;
+
+    vec2 onde;
+    //vec2 onde = vec2(0.0, sin(uv.x*10.0*PI-fastime)/12.5)*smoothLowfreqs2;
+    //vec2 onde = vec2(0.0, (2.0*noise(3.0*uv.x+fastime)+3.0*sin(uv.x)/uv.x)/12.5)*smoothLowfreqs2;
+
+
     for(float i = 0.0; i < 10.0; ++i) {
-      lineSDF = sdSegment( uv, vec2(-1.0,abs(sin((i+ctime)/6.0))), vec2(1.0,noise(uv.y)+abs(sin((i+ctime)/6.0))));
+      onde = vec2(0.0, cos(uv.x*3.33*PI-fract(i*fastime))*sin(uv.x*10.0*i*PI-(i*fastime)/12.5)*smoothLowfreqs2;
+      lineSDF = sdSegment(uv + onde, vec2(0.0,abs(sin((i+ctime)/6.0))), vec2(1.0,abs(sin((i+ctime)/6.0))));
+      //lineSDF = sdSegment( uv, vec2(-1.0,abs(cos(lowfreqs)+sin((i+ctime)/6.0))), vec2(1.0,noise(uv.y)+abs(sin(lowfreqs)+sin((i+ctime)/6.0))));
       nline += 1.0-smoothstep(0.002,0.0021,abs(lineSDF));
     }
     //float lineSDF2 = sdSegment( uv, vec2(-1.0,fract((0.6+time)/6.0)), vec2(1.0,fract((0.6+time)/6.0)));
@@ -147,7 +173,7 @@ void main()
     vec3 scanLineColored=scanline*vec3(0.2,0.7,3.0);
 
     color+=scanLineColored;
-    color+=nline*vec3(2.6,0.4,0.0);
+    color+=nline*vec3(0.0,0.0,5.0);
     //color+=nline*vec3(2.6,0.4,0.0); // GREAT yellow cyberpunk color;  2.0*color in gl_FragColor
     //color+=nline*vec3(1.6,0.1,2.0)*vec3(noise(noise(uv.x)),noise(noise(uv.y)),noise(time));
     //color+=soundwaveValue;
@@ -155,11 +181,8 @@ void main()
 
     color*=lowfreqs;
 
-    vec3 sound = vec3(sampleValue);
-    vec3 fft = vec3(0.6,0.1,0.8)*lowfreqs;
-
-    vec3 freqsvec = vec3(lowfreqs);
+    //vec3 sound = vec3(sampleValue);
 
     //gl_FragColor = vec4(4.0*color*BEAT4, 1.0);
-    gl_FragColor = vec4(6.0*color, 1.0);
+    gl_FragColor = vec4(3.0*color, 1.0);
 }
