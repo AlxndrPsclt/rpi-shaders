@@ -76,23 +76,22 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
 }
 
 
-// OSC server for listening
+// Error handler
 void error(int num, const char *msg, const char *path) {
-    printf("liblo server error %d in path %s: %s\n", num, path, msg);
-    fflush(stdout);
+    fprintf(stderr, "liblo server error %d: %s\n", num, msg);
+    if (path) fprintf(stderr, "Path: %s\n", path);
 }
 
-int generic_handler(const char *path, const char *types, lo_arg **argv,
+// Generic handler for any OSC message
+int generic_handler(const char *path, const char *types, lo_arg **argv, 
                     int argc, void *data, void *user_data) {
-    // Extract the data from the OSC message here
-    // For example, if expecting a float:
-    if (strcmp(types, "f") == 0) {
-        float value = argv[0]->f;
-        printf("Osc %f", value);
-        // Pass the value to your shader as a uniform
-        //SetShaderValue(shader, lowfreqsLoc, &value, SHADER_UNIFORM_FLOAT);
+    printf("Received OSC message: path='%s', types='%s', argc=%d\n", path, types, argc);
+    for (int i = 0; i < argc; i++) {
+        printf("Argument %d: ", i);
+        lo_arg_pp((lo_type)types[i], argv[i]);
+        printf("\n");
     }
-
+    printf("\n");
     return 0;
 }
 
