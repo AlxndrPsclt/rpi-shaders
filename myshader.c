@@ -24,6 +24,8 @@
 #include "raylib.h"
 #include "rlgl.h"
 
+#include <lo/lo.h>
+
 #include <time.h>       // Required for: localtime(), asctime()
 
 #if defined(PLATFORM_DESKTOP)
@@ -73,6 +75,28 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
     (void)pOutput;
 }
 
+
+// OSC server for listening
+void error(int num, const char *msg, const char *path) {
+    printf("liblo server error %d in path %s: %s\n", num, path, msg);
+    fflush(stdout);
+}
+
+int generic_handler(const char *path, const char *types, lo_arg **argv,
+                    int argc, void *data, void *user_data) {
+    // Extract the data from the OSC message here
+    // For example, if expecting a float:
+    if (strcmp(types, "f") == 0) {
+        float value = argv[0]->f;
+        printf("Osc %f", value);
+        // Pass the value to your shader as a uniform
+        //SetShaderValue(shader, lowfreqsLoc, &value, SHADER_UNIFORM_FLOAT);
+    }
+
+    return 0;
+}
+
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -82,6 +106,10 @@ int main(void)
     //--------------------------------------------------------------------------------------
     const int screenWidth = 1920;
     const int screenHeight = 1080;
+
+    lo_server_thread st = lo_server_thread_new("12345", error);
+    lo_server_thread_add_method(st, NULL, NULL, generic_handler, NULL);
+
 
     fftResult = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * MAX_SAMPLES);
 
@@ -161,6 +189,7 @@ int main(void)
         return -3;
     }
 
+    lo_server_thread_start(st);
 
     // Main visualization loop
     while (!WindowShouldClose())            // Detect window close button or ESC key
@@ -239,6 +268,7 @@ int main(void)
     ma_device_uninit(&device);
     ma_encoder_uninit(&encoder);
     fftw_free(fftResult);
+    lo_server_thread_free(st);
     //--------------------------------------------------------------------------------------
 
     return 0;
