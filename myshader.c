@@ -39,6 +39,7 @@
 int16_t audioSamples[MAX_SAMPLES];
 double fftInput[MAX_SAMPLES];
 float fftInputFloat[MAX_SAMPLES];
+float oscVal01 = 0.0;
 
 
 fftw_complex *fftResult;
@@ -90,6 +91,7 @@ int generic_handler(const char *path, const char *types, lo_arg **argv,
         printf("Argument %d: ", i);
         lo_arg_pp((lo_type)types[i], argv[i]);
         printf("\n");
+        oscVal01 = argv[i];
     }
     printf("\n");
     return 0;
@@ -126,6 +128,7 @@ int main(void)
     int mouseLoc = GetShaderLocation(shader, "mouse");
     int timeLoc = GetShaderLocation(shader, "time");
     int lowfreqsLoc = GetShaderLocation(shader, "lowfreqs");
+    int oscVal01Loc = GetShaderLocation(shader, "oscVal01");
     int audioTextureLoc = GetShaderLocation(shader, "texture3");
 
     Texture2D audioTexture = { 0 };
@@ -203,6 +206,7 @@ int main(void)
         SetShaderValue(shader, timeLoc, &totalTime, SHADER_UNIFORM_FLOAT);
         SetShaderValue(shader, mouseLoc, mousePos, SHADER_UNIFORM_VEC2);
         SetShaderValue(shader, lowfreqsLoc, &lowfreqs, SHADER_UNIFORM_FLOAT);
+        SetShaderValue(shader, oscVal01Loc, &oscVal01, SHADER_UNIFORM_FLOAT);
 
         UpdateTexture(audioTexture, fftInputFloat);
 
