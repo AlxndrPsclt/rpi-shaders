@@ -71,6 +71,10 @@ float drawGrid( in vec2 p, in vec2 origin)
     //isPartOfTheGrid+= fract(abs(p.x-origin.x));
     return isPartOfTheGrid;
 }
+float sdCircle( in vec2 p, in vec2 c, float r )
+{
+    return length(p - c) - r;
+}
 
 mat2 rotate2d(float theta)
 {
@@ -117,10 +121,13 @@ void main()
     float scanLineSDF = sdSegment( uv/5.0, vec2(sin(0.08*PI*time/10.0)/2.0,-1.0), vec2(sin(0.06*PI*time/10.1)/2.0, 1.0));
     float scanline = 1.0-smoothstep(0.0003,0.00031,abs(scanLineSDF));
 
+    //float circleSDF = sdCircle( uv*0.2, vec2(0.0,0.5), abs(cos(time))/2.0);
+    float circleSDF = sdCircle( uv+vec2(0.0, lowfreqs*0.001), vec2(0.5,0.5), abs(cos(time))/2.0);
+    float circle = 1.0-smoothstep(0.0003,0.0005,abs(circleSDF));
 
     float ctime = time/10.0;
 
-    float smoothLowfreqs = smoothstep(0.1,2.5,lowfreqs);
+    float smoothLowfreqs = smoothstep(0.1,2.5,lowfreqs*0.01);
 
     float lineSDF;
     for(float i = 0.0; i < floor(smoothLowfreqs*10.0); ++i) {
@@ -150,12 +157,13 @@ void main()
 
     color+=scanLineColored;
     //color+=nline*vec3(1.2,0.1,0.9); //some cool pink
-    color+=nline*vec3(0.3,0.1,0.5)*4.0; // Some cool yellow
+    color+=nline*vec3(0.9,0.01,0.0)*4.0; // Some cool yellow
     //color+=nline*vec3(2.6,0.4,0.0); // GREAT yellow cyberpunk color;  2.0*color in gl_FragColor
     //color+=nline*vec3(1.6,0.1,2.0)*vec3(noise(noise(uv.x)),noise(noise(uv.y)),noise(time));
     //color+=soundwaveValue;
     //color+=grid;
 
+    color+=circle*vec3(0.9,0.4,0.0)*5.0; // Some cool yellow
     //color*=lowfreqs;
 
     //vec3 sound = vec3(sampleValue);
@@ -165,7 +173,7 @@ void main()
 
     //vec3 variableDeRami = vec3((2.0+sin(time))*lowfreqs, (2.0+cos(time))*(1.0-lowfreqs), abs(sin(lowfreqs)));
 
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(1.4*color, 1.0);
 }
 
 
