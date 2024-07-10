@@ -39,6 +39,27 @@ float sdLine( in vec2 p, in vec2 a, in vec2 b )
     return length( pa - ba*h );
 }
 
+float sdEquilateralTriangle( in vec2 p, in float r )
+{
+    const float k = sqrt(3.0);
+    p.x = abs(p.x) - r;
+    p.y = p.y + r/k;
+    if( p.x+k*p.y>0.0 ) p = vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;
+    p.x -= clamp( p.x, -2.0*r, 0.0 );
+    return -length(p)*sign(p.y);
+}
+
+float sdTriangleIsosceles( in vec2 p, in vec2 q )
+{
+    p.x = abs(p.x);
+    vec2 a = p - q*clamp( dot(p,q)/dot(q,q), 0.0, 1.0 );
+    vec2 b = p - q*vec2( clamp( p.x/q.x, 0.0, 1.0 ), 1.0 );
+    float s = -sign( q.y );
+    vec2 d = min( vec2( dot(a,a), s*(p.x*q.y-p.y*q.x) ),
+                  vec2( dot(b,b), s*(p.y-q.y)  ));
+    return -sqrt(d.x)*sign(d.y);
+}
+
 float drawCircle( in vec2 p, in vec2 c, in float r)
 {
 //vec2 pa = p-a, ba = b-a;
@@ -48,6 +69,25 @@ float drawCircle( in vec2 p, in vec2 c, in float r)
     float value = 1.0-smoothstep(0.000,0.003, circleLine);
     return value;
 }
+
+float drawTriangle( in vec2 p, in vec2 c, in float r, in float d)
+{
+//vec2 pa = p-a, ba = b-a;
+    float sdTri = sdEquilateralTriangle(p-c, r);
+    float value = 1.0-float(d<abs(sdTri));
+    //float value = smoothstep(0.000,0.003, min(0.05,sdTri));
+    return value;
+}
+
+float drawIsoTriangle(in vec2 p, in vec2 c, in vec2 q, in float d)
+{
+//vec2 pa = p-a, ba = b-a;
+    float sdTri = sdTriangleIsosceles(p-c, q);
+    float value = 1.0-float(d<abs(sdTri));
+    //float value = smoothstep(0.000,0.003, min(0.05,sdTri));
+    return value;
+}
+
 
 float sdSegment( in vec2 p, in vec2 a, in vec2 b )
 {
@@ -116,16 +156,42 @@ void main()
     //uv = rotate2d(PI/2.0)*uv;
     //uv+=vec2(1.0,1.0);
 
-    vec3 color=vec3(1.0);
+    vec3 color=vec3(0.0);
 
+    //color+= triangleValue;
+
+
+    float currentGlobalRotationAngle = sin(time)*PI;
+    float circleRadius = 0.2;
     vec2 circleCenter = vec2(0.5, resolution.y/(2.0*resolution.x));
-    color *= drawCircle(uv, circleCenter, 0.2);
+    vec2 centeredUv = uv-circleCenter;
+
+    color += drawCircle(uv, circleCenter, circleRadius);
+
+    vec2 trianglesOffset = vec2(0.0,circleRadius+0.04);
+
+    vec2 uv1 = rotate2d(currentGlobalRotationAngle)*centeredUv-trianglesOffset;
+    vec2 uv2 = rotate2d(currentGlobalRotationAngle+PI/2.0)*centeredUv-trianglesOffset;
+    vec2 uv3 = rotate2d(currentGlobalRotationAngle+PI)*centeredUv-trianglesOffset;
+    vec2 uv4 = rotate2d(currentGlobalRotationAngle+3.0*PI/2.0)*centeredUv-trianglesOffset;
+
+    color+= drawTriangle(uv, circleCenter+vec2(0.0,0.24), 0.03, 0.0025);
+
+    color+= drawTriangle(uv1, vec2(0.0,0.0), 0.03, 0.0025);
+    color+= drawTriangle(uv2, vec2(0.0,0.0), 0.03, 0.0025);
+    color+= drawTriangle(uv3, vec2(0.0,0.0), 0.03, 0.0025);
+    color+= drawTriangle(uv4, vec2(0.0,0.0), 0.03, 0.0025);
+
+
+    color+= drawIsoTriangle(uv, circleCenter+vec2(0.00,0.14), vec2(0.03,-0.1), 0.003);
+    color+= drawIsoTriangle(uv, circleCenter-vec2(0.00,0.14), vec2(0.03,0.1), 0.003);
+
     //vec3 color=vec3(uv.x, uv.y, 0.0);
 //color*=6.0*mod(time/2.0,1.0);
     //color*=step(0.6, fract(time));
 
     vec3 gridGradient = vec3(uv.x,uv.y,0.0);
-    color+=gridGradient;
+    //color+=gridGradient;
 
     gl_FragColor = vec4(color, 1.0);
 }
