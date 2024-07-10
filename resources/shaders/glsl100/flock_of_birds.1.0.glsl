@@ -39,16 +39,6 @@ float sdLine( in vec2 p, in vec2 a, in vec2 b )
     return length( pa - ba*h );
 }
 
-float drawCircle( in vec2 p, in vec2 c, in float r)
-{
-//vec2 pa = p-a, ba = b-a;
-    float currentPoint = length( p - c );
-    float circleLine = abs(currentPoint - r);
-    //float cicleLine = smoothstep(0.45,0.5,);
-    float value = 1.0-smoothstep(0.000,0.003, circleLine);
-    return value;
-}
-
 float sdSegment( in vec2 p, in vec2 a, in vec2 b )
 {
     vec2 pa = p-a, ba = b-a;
@@ -112,20 +102,17 @@ void main()
     float BEAT16 = fract(BEAT_VALUE * 0.0625);
     float BEAT32 = fract(BEAT_VALUE * 0.03125);
 
-    vec2 uv = gl_FragCoord.xy/resolution.x;
+    vec2 uv = gl_FragCoord.xy/resolution;
     //uv = rotate2d(PI/2.0)*uv;
     //uv+=vec2(1.0,1.0);
 
-    vec3 color=vec3(1.0);
-
-    vec2 circleCenter = vec2(0.5, resolution.y/(2.0*resolution.x));
-    color *= drawCircle(uv, circleCenter, 0.2);
+    vec3 color=vec3(0.0);
     //vec3 color=vec3(uv.x, uv.y, 0.0);
 //color*=6.0*mod(time/2.0,1.0);
     //color*=step(0.6, fract(time));
-
-    vec3 gridGradient = vec3(uv.x,uv.y,0.0);
-    color+=gridGradient;
+    color+=vec3(0.4,0.2,3.6*noise(time/7.0))*drawSegment(uv.xy, vec2(noise(uv.y),0.3)*noise(time+4.0*uv.x), vec2(0.7*5.0+noise(noise(sin(time))), 0.3*5.0+noise(noise(time))));
+    color+=2.0*noise(time)*vec3(0.6,0.0,0.6)*drawSegment(uv.xy, vec2(rand(uv.y*uv.x),0.7)*noise(time+4.0*uv.x), vec2(0.3, uv.x)*noise(noise(time)));
+    color+=vec3(0.8*noise(time*uv.x),0.0,0.3)*drawSegment(uv.xy, vec2(0.8,rand(uv.y*uv.x))*noise(time+4.0*uv.y), vec2(0.8+noise(noise(time/7.0)), 0.9-noise(noise(time))));
 
     gl_FragColor = vec4(color, 1.0);
 }
