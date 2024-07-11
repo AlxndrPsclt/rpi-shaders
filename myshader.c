@@ -69,9 +69,9 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
     computeFFT(MAX_SAMPLES, fftInput, fftResult);
 
     lowfreqs = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
-    //printf("Audio %f\n", fftInput[2]);
-    //printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
-    //printf("FFT %f\n", lowfreqs);
+    printf("Audio %f\n", fftInput[2]);
+    printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
+    printf("FFT %f\n", lowfreqs);
 
     (void)pOutput;
 }

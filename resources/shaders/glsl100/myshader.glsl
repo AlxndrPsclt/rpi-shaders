@@ -133,7 +133,7 @@ mat2 rotate2d(float theta)
 }
 // Input vertex attributes (from vertex shader)
 varying vec2 fragTexCoord;           // Texture coordinates (sampler2D)
-varying vec4 fragColor;              // Tint color
+//varying vec4 fragColor;              // Tint color
 
 // Uniform inputs
 uniform vec2 resolution;        // Viewport resolution (in pixels)
@@ -166,25 +166,39 @@ void main()
     vec2 circleCenter = vec2(0.5, resolution.y/(2.0*resolution.x));
     vec2 centeredUv = uv-circleCenter;
 
-    color += drawCircle(uv, circleCenter, circleRadius);
+    float angle = acos(dot(centeredUv, vec2(0.0,1.0)));
+    float noiseOffsetAngle = noise(5.0*noise(angle*uv.x)+time/5.0)/7.0;
+    uv+=noiseOffsetAngle;
+    centeredUv = uv-circleCenter;
+    float peakFactorSin=3.0*smoothstep(0.9,0.99,sin(uv.x+time))+0.3*noise(3.0*uv.y+time);
+    float peakFactorCos=3.0*smoothstep(0.9,0.99,cos(uv.x+time))+0.3*noise(3.0*uv.y+time);
+    color += drawCircle(uv, circleCenter, (0.5+sin(time)*1.0)*circleRadius*(1.0+noise(time*uv.x)*0.01));
+    color += drawCircle(uv, circleCenter, (0.5+sin(time)*0.75)*circleRadius*(1.0+noise(time*uv.x)*0.00));
+    color += drawCircle(uv, circleCenter, (0.5+sin(time)*0.5*noise(time))*circleRadius*(1.0+noise(time*uv.x)*0.00));
+    color += drawCircle(uv, circleCenter, (0.5+sin(time)*0.25)*circleRadius*(1.0+noise(time*uv.x)*0.00));
+    color += drawCircle(uv, circleCenter, (0.5+sin(time)*0.10)*circleRadius*(1.0+noise(time*uv.y)*0.0));
 
     vec2 trianglesOffset = vec2(0.0,circleRadius+0.04);
 
-    vec2 uv1 = rotate2d(currentGlobalRotationAngle)*centeredUv-trianglesOffset;
-    vec2 uv2 = rotate2d(currentGlobalRotationAngle+PI/2.0)*centeredUv-trianglesOffset;
-    vec2 uv3 = rotate2d(currentGlobalRotationAngle+PI)*centeredUv-trianglesOffset;
-    vec2 uv4 = rotate2d(currentGlobalRotationAngle+3.0*PI/2.0)*centeredUv-trianglesOffset;
+    vec2 uvN = rotate2d(currentGlobalRotationAngle+noise(time)/4.0)*centeredUv-trianglesOffset;
+    vec2 uvE = rotate2d(currentGlobalRotationAngle+noise(time+noise(time))+PI/2.0)*centeredUv-trianglesOffset;
+    vec2 uvS = rotate2d(currentGlobalRotationAngle+noise(time+noise(time*time))/4.0+PI)*centeredUv-trianglesOffset;
+    vec2 uvW = rotate2d(currentGlobalRotationAngle+noise(time+1.77*noise(rand(3.0)*time))/4.0+3.0*PI/2.0)*centeredUv-trianglesOffset;
 
-    color+= drawTriangle(uv, circleCenter+vec2(0.0,0.24), 0.03, 0.0025);
+    //color+= drawTriangle(uv, circleCenter+vec2(0.0,0.24), 0.03, 0.0025);
 
-    color+= drawTriangle(uv1, vec2(0.0,0.0), 0.03, 0.0025);
-    color+= drawTriangle(uv2, vec2(0.0,0.0), 0.03, 0.0025);
-    color+= drawTriangle(uv3, vec2(0.0,0.0), 0.03, 0.0025);
-    color+= drawTriangle(uv4, vec2(0.0,0.0), 0.03, 0.0025);
+    color+= drawTriangle(uvN, vec2(0.0,0.0), 0.03, 0.0025);
+    color+= drawTriangle(uvE, vec2(0.0,0.0), 0.03, 0.0025);
+    color+= drawTriangle(uvS, vec2(0.0,0.0), 0.03, 0.0025);
+    color+= drawTriangle(uvW, vec2(0.0,0.0), 0.03, 0.0025);
 
 
-    color+= drawIsoTriangle(uv, circleCenter+vec2(0.00,0.14), vec2(0.03,-0.1), 0.003);
-    color+= drawIsoTriangle(uv, circleCenter-vec2(0.00,0.14), vec2(0.03,0.1), 0.003);
+
+    vec2 isoTriangleOffset = vec2(0.0,0.11);
+    vec2 uvArrowN = rotate2d(-currentGlobalRotationAngle*(1.0+noise(time)))*centeredUv-isoTriangleOffset;
+    vec2 uvArrowS = rotate2d(-currentGlobalRotationAngle*(1.0+noise(noise(time)))+PI)*centeredUv-isoTriangleOffset;
+    color+= drawIsoTriangle(uvArrowN, vec2(0.0,0.0), vec2(0.03,-0.1), 0.003);
+    color+= drawIsoTriangle(uvArrowS, vec2(0.0,0.0), vec2(0.03,-0.1), 0.003);
 
     //vec3 color=vec3(uv.x, uv.y, 0.0);
 //color*=6.0*mod(time/2.0,1.0);
@@ -192,6 +206,8 @@ void main()
 
     vec3 gridGradient = vec3(uv.x,uv.y,0.0);
     //color+=gridGradient;
+    color=texture2D(texture0, vec2(0.5, 0.0)).xyz;
+    color=color*color*color;
 
     gl_FragColor = vec4(color, 1.0);
 }
