@@ -206,8 +206,9 @@ void main()
 
     vec3 gridGradient = vec3(uv.x,uv.y,0.0);
     //color+=gridGradient;
-    color=texture2D(texture0, vec2(0.5, 0.0)).xyz;
-    color=color*color*color;
+    //color=texture2D(texture3, vec2(0.5, 0.0)).xyz;
+    color=vec3(10.0*lowfreqs);
+    color=vec3(1.0);
 
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(rand(color.x), rand(color.y), rand(color.z), 1.0);
 }

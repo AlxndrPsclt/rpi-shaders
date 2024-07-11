@@ -11,7 +11,8 @@ $(error PLATFORM variable is not set or recognized. Please use PLATFORM=DESKTOP 
 endif
 
 # Libraries
-LIBS =  -lraylib -lfftw3 -L/home/alex/raylib/src -lGLESv2 -lEGL -ldrm -lgbm -lpthread -lrt -lm -ldl -llo
+LIBS =  -lraylib -lfftw3 -L/home/alex/raylib/src -lGLESv2 -lEGL -ldrm -lgbm -lpthread -lrt -lm -ldl
+#LIBS =  -lraylib -lfftw3 -L/home/alex/raylib/src -lGLESv2 -lEGL -ldrm -lgbm -lpthread -lrt -lm -ldl -llo
 LDFLAGS = -lGL -lm -lpthread -ldl -lrt -ldrm 
 
 # Source files and object files

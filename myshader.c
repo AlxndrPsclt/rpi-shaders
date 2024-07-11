@@ -24,7 +24,7 @@
 #include "raylib.h"
 #include "rlgl.h"
 
-#include <lo/lo.h>
+//#include <lo/lo.h>
 
 #include <time.h>       // Required for: localtime(), asctime()
 
@@ -69,9 +69,9 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
     computeFFT(MAX_SAMPLES, fftInput, fftResult);
 
     lowfreqs = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
-    printf("Audio %f\n", fftInput[2]);
-    printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
-    printf("FFT %f\n", lowfreqs);
+    //printf("Audio %f\n", fftInput[2]);
+    //printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
+    //printf("FFT %f\n", lowfreqs);
 
     (void)pOutput;
 }
@@ -84,18 +84,18 @@ void error(int num, const char *msg, const char *path) {
 }
 
 // Generic handler for any OSC message
-int generic_handler(const char *path, const char *types, lo_arg **argv, 
-                    int argc, void *data, void *user_data) {
-    printf("Received OSC message: path='%s', types='%s', argc=%d\n", path, types, argc);
-    for (int i = 0; i < argc; i++) {
-        printf("Argument %d: ", i);
-        lo_arg_pp((lo_type)types[i], argv[i]);
-        printf("\n");
-        oscVal01 = argv[i];
-    }
-    printf("\n");
-    return 0;
-}
+//int generic_handler(const char *path, const char *types, lo_arg **argv, 
+//                    int argc, void *data, void *user_data) {
+//    printf("Received OSC message: path='%s', types='%s', argc=%d\n", path, types, argc);
+//    for (int i = 0; i < argc; i++) {
+//        printf("Argument %d: ", i);
+//        lo_arg_pp((lo_type)types[i], argv[i]);
+//        printf("\n");
+//        oscVal01 = argv[i];
+//    }
+//    printf("\n");
+//    return 0;
+//}
 
 
 //------------------------------------------------------------------------------------
@@ -108,8 +108,8 @@ int main(void)
     const int screenWidth = 1920;
     const int screenHeight = 1080;
 
-    lo_server_thread st = lo_server_thread_new("12345", error);
-    lo_server_thread_add_method(st, NULL, NULL, generic_handler, NULL);
+    //lo_server_thread st = lo_server_thread_new("12345", error);
+    //lo_server_thread_add_method(st, NULL, NULL, generic_handler, NULL);
 
 
     fftResult = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * MAX_SAMPLES);
@@ -191,7 +191,7 @@ int main(void)
         return -3;
     }
 
-    lo_server_thread_start(st);
+    //lo_server_thread_start(st);
 
     // Main visualization loop
     while (!WindowShouldClose())            // Detect window close button or ESC key
@@ -271,7 +271,7 @@ int main(void)
     ma_device_uninit(&device);
     ma_encoder_uninit(&encoder);
     fftw_free(fftResult);
-    lo_server_thread_free(st);
+    //lo_server_thread_free(st);
     //--------------------------------------------------------------------------------------
 
     return 0;
