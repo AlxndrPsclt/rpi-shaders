@@ -9,7 +9,7 @@ uniform vec2 resolution;        // Viewport resolution (in pixels)
 float zoom=1.5; // Controls the zoom level
 float panX=0.0; // Controls horizontal panning
 float panY=0.0; // Controls vertical panning
-float iterations=10.0; // Number of iterations
+float iterations=20.0; // Number of iterations
 
 uniform sampler2D texture3;
 
@@ -63,7 +63,6 @@ void main() {
 //    //float sampleValue = (texture2D(texture3, vec2(uv.x, 0.5)).r - 0.5)*20.0 + 0.5;  // Accessing the red channel which contains our sample data
 //    float soundwaveValue=1.0-smoothstep(length(sampleValue), 0.15, 0.2);
 
-    float zoomTime=sin(time)*zoom;
     vec2 uv = gl_FragCoord.xy / resolution.xy;
     //uv.xy *=(1.0+noise(time));
     uv.xy *= (1.0+noise(time)*uv.x);
@@ -72,8 +71,9 @@ void main() {
 
     vec3 gridGradient = vec3(uv.x,uv.y,0.0);
     // Scale and translate coordinates according to zoom and pan
+    zoom+=2.0*noise(sin(time));
     float x = zoom*uv.y;
-    float r = zoom*(0.5*uv.x+3.5);
+    float r =0.5* zoom*(0.5*uv.x+3.5);
 
     vec3 gridGradient2 = vec3(x,r,0.0);
     // Initial value for the logistic map
