@@ -68,7 +68,7 @@ void main() {
     //uv.xy *=(1.0+noise(time));
     uv.xy *= (1.0+noise(time)*uv.x);
     uv.y +=3.0*noise(time)*noise(uv.y)*noise(uv.y*10.0*cos(time*0.1));
-    uv.y +=3.0*noise(time)*noise(uv.y)*noise(uv.x*10.0*cos(time*0.1));
+    uv.y +=3.0*noise(time)*noise(uv.y)*noise(uv.x*30.0*cos(time*0.1));
 
     vec3 gridGradient = vec3(uv.x,uv.y,0.0);
     // Scale and translate coordinates according to zoom and pan
@@ -87,7 +87,7 @@ void main() {
 
         // If the value falls within the current pixel, set the pixel to white
         iterFinal=i;
-        if (abs(xn -x) < 0.0775*sin(time)) {
+        if (abs(xn -x) < 0.0775) {
             inside = true;
             break;
         }
