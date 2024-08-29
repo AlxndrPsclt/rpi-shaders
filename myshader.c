@@ -38,6 +38,8 @@ int16_t audioSamples[MAX_SAMPLES];
 double fftInput[MAX_SAMPLES];
 float fftInputFloat[MAX_SAMPLES];
 
+#define MESSAGE_SAMPLES 100;
+float messageFloats[100];
 
 fftw_complex *fftResult;
 
@@ -68,9 +70,18 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
     lowfreqs = sqrt(fftResult[2][0] * fftResult[2][0] + fftResult[2][1] * fftResult[2][1]);
     //printf("Audio %f\n", fftInput[2]);
     //printf("FFT %f %f\n", fftResult[2][0], fftResult[2][1]);
-    printf("FFT %f\n", lowfreqs);
+    //printf("FFT %f\n", lowfreqs);
 
     (void)pOutput;
+}
+
+void messageDataChange()
+{
+    for(ma_uint32 i = 0; i < 100; i++)
+    {
+        messageFloats[i] = (float)(i % 3);
+    }
+    //printf("message %f %f %f %f\n", messageFloats[0], messageFloats[1], messageFloats[2], messageFloats[3]);
 }
 
 //------------------------------------------------------------------------------------
@@ -100,6 +111,7 @@ int main(void)
     int timeLoc = GetShaderLocation(shader, "time");
     int lowfreqsLoc = GetShaderLocation(shader, "lowfreqs");
     int audioTextureLoc = GetShaderLocation(shader, "texture3");
+    int messageTextureLoc = GetShaderLocation(shader, "texture4");
 
     Texture2D audioTexture = { 0 };
     audioTexture.width = MAX_SAMPLES;
@@ -115,9 +127,19 @@ int main(void)
     SetShaderValue(shader, textureSizeLoc, &textureSize, SHADER_UNIFORM_VEC2);
     SetShaderValue(shader, lowfreqsLoc, &lowfreqs, SHADER_UNIFORM_FLOAT);
 
-
     float resolution[2] = { (float)screenWidth, (float)screenHeight };
     SetShaderValue(shader, resolutionLoc, resolution, SHADER_UNIFORM_VEC2);
+
+    Texture2D messageTexture = { 0 };
+    messageTexture.width = MESSAGE_SAMPLES;
+    messageTexture.height = 1;
+    messageTexture.mipmaps = 1;
+    messageTexture.format = PIXELFORMAT_UNCOMPRESSED_R32;
+    unsigned int messageTextureId = rlLoadTexture(NULL, messageTexture.width, messageTexture.height, messageTexture.format, 1);
+    messageTexture.id = messageTextureId;
+    SetShaderValueTexture(shader, messageTextureLoc, messageTexture);
+
+
 
     float totalTime = 0.0f;
     bool shaderAutoReloading = true;
@@ -177,6 +199,8 @@ int main(void)
         SetShaderValue(shader, lowfreqsLoc, &lowfreqs, SHADER_UNIFORM_FLOAT);
 
         UpdateTexture(audioTexture, fftInputFloat);
+        messageDataChange();
+        UpdateTexture(messageTexture, messageFloats);
 
         // Hot shader reloading
         if (shaderAutoReloading || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)))
@@ -219,6 +243,7 @@ int main(void)
             // We only draw a white full-screen rectangle, frame is generated in shader
             BeginShaderMode(shader);
                 SetShaderValueTexture(shader, audioTextureLoc, audioTexture);
+                SetShaderValueTexture(shader, messageTextureLoc, messageTexture);
                 DrawRectangle(0, 0, screenWidth, screenHeight, BLACK);
             EndShaderMode();
 
@@ -232,6 +257,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     UnloadShader(shader);           // Unload shader
     UnloadTexture(audioTexture);
+    UnloadTexture(messageTexture);
 
 
     CloseWindow();                  // Close window and OpenGL context
