@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Define a list of IP addresses (space-separated string)
-MACHINES="192.168.8.126 192.168.8.127 192.168.8.128 192.168.8.129"
+MACHINES="192.168.43.250 192.168.8.127 192.168.8.128 192.168.8.129 192.168.8.117"
 
 # Use fzf to select the target IP address
 TARGET_IP=$(echo "$MACHINES" | tr ' ' '\n' | fzf --prompt="Select target IP: ")

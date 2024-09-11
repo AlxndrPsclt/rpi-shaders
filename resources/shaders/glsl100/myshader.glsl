@@ -71,7 +71,7 @@ void main() {
 
     vec3 gridGradient = vec3(uv.x,uv.y,0.0);
     // Scale and translate coordinates according to zoom and pan
-    zoom+=2.0*noise(sin(time));
+    zoom+=10.0*noise(tan(time));
     float x = zoom*uv.y;
     float r =0.5* zoom*(0.5*uv.x+3.5);
 
@@ -79,15 +79,15 @@ void main() {
     // Initial value for the logistic map
     float xn = x;
     bool inside = false;
-    int iterFinal=1;
+    int iterFinal=0;
 
     // Iterate the logistic map
-    for (int i = 1; i < int(iterations); i++) {
+    for (int i = 0; i < int(iterations); i++) {
         xn = r*(1.0+0.01) * xn * (1.0 - xn);
 
         // If the value falls within the current pixel, set the pixel to white
         iterFinal=i;
-        if (abs(xn -x) < 0.0775) {
+        if (abs(xn -x) < 0.0275) {
             inside = true;
             break;
         }
@@ -106,6 +106,8 @@ void main() {
         //color = vec3(0.0);
     //}
     //gl_FragColor = vec4(vec3(0.3*exp(color.x*uv.y*sin(time)), tan(color.y), tan(color.z)), 1.0);
-    gl_FragColor = vec4(color*color*color*2.0*3.0, 1.0);
+    vec3 colorvec = vec3(1.0/float(iterFinal),1.0-float(iterFinal)/iterations, 20.0*noise(float(iterFinal*iterFinal)/iterations));
+    gl_FragColor = vec4(colorvec*color*color*color*30.0, 1.0);
+    //gl_FragColor = vec4(color*color*color*2.0*3.0, 1.0);
 }
 
