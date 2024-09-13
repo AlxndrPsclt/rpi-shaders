@@ -3,22 +3,20 @@
 #include <stddef.h>  // For NULL
 
 void initAudioTexture(Texture2D* audioTexture, Shader shader, int audioTextureLoc) {
-    audioTexture->width = 1024;
-    audioTexture->height = 1;
-    audioTexture->mipmaps = 1;
-    audioTexture->format = PIXELFORMAT_UNCOMPRESSED_R32;
-    unsigned int textureId = rlLoadTexture(NULL, audioTexture->width, audioTexture->height, audioTexture->format, 1);
-    audioTexture->id = textureId;
+    // Initialize a blank texture with the specified size
+    Image audioImage = GenImageColor(1024, 1, BLANK);  // Create a blank image
+    *audioTexture = LoadTextureFromImage(audioImage);  // Load the image into a texture
+    UnloadImage(audioImage);  // Once the texture is created, the image can be unloaded
+
     SetShaderValueTexture(shader, audioTextureLoc, *audioTexture);
 }
 
 void initMessageTexture(Texture2D* messageTexture, Shader shader, int messageTextureLoc) {
-    messageTexture->width = 100;
-    messageTexture->height = 1;
-    messageTexture->mipmaps = 1;
-    messageTexture->format = PIXELFORMAT_UNCOMPRESSED_R32;
-    unsigned int textureId = rlLoadTexture(NULL, messageTexture->width, messageTexture->height, messageTexture->format, 1);
-    messageTexture->id = textureId;
+    // Initialize a blank texture with the specified size
+    Image messageImage = GenImageColor(100, 1, BLANK);  // Create a blank image
+    *messageTexture = LoadTextureFromImage(messageImage);  // Load the image into a texture
+    UnloadImage(messageImage);  // Once the texture is created, the image can be unloaded
+
     SetShaderValueTexture(shader, messageTextureLoc, *messageTexture);
 }
 
