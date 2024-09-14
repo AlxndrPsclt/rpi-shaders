@@ -18,7 +18,8 @@ void main() {
     color *= mod(oscInt, 5.0) + 1.0;  // Modulate by oscInt value
 
     vec3 colorGrid = vec3(uv.x, uv.y, 0.0);
+    vec3 colorTint = vec3(oscVec3);
     
-    gl_FragColor = vec4(colorGrid*oscFloat, 1.0);
+    gl_FragColor = vec4(colorGrid*oscFloat+colorTint, 1.0);
 }
 

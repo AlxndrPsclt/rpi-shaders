@@ -1,8 +1,8 @@
 #include "raylib.h"
 #include "audio.h"
-#include "shader.h"
 #include "textures.h"
-#include "osc.h"  // Add this to include OSC server
+#include "osc.h"
+#include "shaderReload.h"  // Include shader reloading and update function
 #include <time.h>
 
 #if defined(PLATFORM_DESKTOP)
@@ -14,6 +14,8 @@
 int main(void) {
     const int screenWidth = 1920;
     const int screenHeight = 1080;
+    float resolution[2] = { (float)screenWidth, (float)screenHeight };  // Define resolution first
+
     InitWindow(screenWidth, screenHeight, "Shader + Audio Visualization + OSC");
 
     // Start OSC server
@@ -29,45 +31,45 @@ int main(void) {
     Shader shader;
     time_t fragShaderFileModTime;
     const char *fragShaderFileName = "resources/shaders/glsl%i/myshader.glsl";
+    int uniformLocations[7];  // Array to store uniform locations (oscFloat, oscInt, oscVec3, texture3, texture4, mouse, time)
+    shader = loadShaderWithReloading(TextFormat(fragShaderFileName, GLSL_VERSION), &fragShaderFileModTime, shader, uniformLocations, resolution);
 
-    shader = loadShaderWithReloading(TextFormat(fragShaderFileName, GLSL_VERSION), &fragShaderFileModTime);
-
-    float resolution[2] = { (float)screenWidth, (float)screenHeight };
     Vector2 mousePos = { 0.0f, 0.0f };
     float totalTime = 0.0f;
     Texture2D audioTexture, messageTexture;
-    int audioTextureLoc = GetShaderLocation(shader, "texture3");
-    int messageTextureLoc = GetShaderLocation(shader, "texture4");
 
-    // Uniform locations for different OSC paths
-    int oscFloatLoc = GetShaderLocation(shader, "oscFloat");
-    int oscIntLoc = GetShaderLocation(shader, "oscInt");
-    int oscVec3Loc = GetShaderLocation(shader, "oscVec3");
+    initAudioTexture(&audioTexture, shader, uniformLocations[3]);
+    initMessageTexture(&messageTexture, shader, uniformLocations[4]);
 
-    initAudioTexture(&audioTexture, shader, audioTextureLoc);
-    initMessageTexture(&messageTexture, shader, messageTextureLoc);
+    bool shaderAutoReloading = true;  // Auto-reload shader on file changes
 
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
-        totalTime += GetFrameTime();
-        mousePos = GetMousePosition();
 
+        // Shader auto-reloading logic
+        if (shaderAutoReloading || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            shader = loadShaderWithReloading(TextFormat(fragShaderFileName, GLSL_VERSION), &fragShaderFileModTime, shader, uniformLocations, resolution);
+        }
+
+        // Toggle auto-reloading with the 'A' key
+        if (IsKeyPressed(KEY_A)) {
+            shaderAutoReloading = !shaderAutoReloading;
+        }
+
+        // Update the uniform and texture values
         // Get the OSC values from the OSC server
         float oscFloat = getOscFloat();
         int oscInt = getOscInt();
         float *oscVec3 = getOscVec3();
+        // Update time and mouse position
+        totalTime += GetFrameTime();
+        mousePos = GetMousePosition();
 
-        // Update shader values and textures
-        updateShaderValues(shader, resolution, &mousePos, &totalTime, &lowfreqs);
-        
-        // Pass the OSC values to the shader
-        SetShaderValue(shader, oscFloatLoc, &oscFloat, SHADER_UNIFORM_FLOAT);  // Pass the float value
-        SetShaderValue(shader, oscIntLoc, &oscInt, SHADER_UNIFORM_INT);  // Pass the int value
-        SetShaderValue(shader, oscVec3Loc, oscVec3, SHADER_UNIFORM_VEC3);  // Pass the vec3 value
-        
+        updateShaderValues(shader, uniformLocations, oscFloat, oscInt, oscVec3, mousePos, totalTime);
 
         UpdateTexture(audioTexture, fftInputFloat);
         UpdateTexture(messageTexture, messageFloats);
+
 
         // Rendering
         BeginDrawing();
