@@ -5,9 +5,17 @@
 - Add Non realime rendering to generate HD videos for the inernet
 - Clean shaders utils to have coherent and understandable tools
 - Handle the usual problem with the RPIs networks in the wild; either through a dedicated router, or through a peer2peer network
+- Backup controller sd card, and RPI sd card.
+- Write blog posts about it.
 
 # Minor
 
 - Add support for kinect
 - Add support for text
-- Handle support of glsl with higher versions than 100. RPI4 should support it.
+- Handle support of glsl with higher versions than 100. RPI4 should support it
+- Build a stateless RPI4 image
+
+# Long term
+
+- Release the project as soon as possible (^^)
+- Create a product
