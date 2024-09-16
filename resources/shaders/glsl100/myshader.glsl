@@ -4,7 +4,6 @@ precision mediump float;
 
 uniform vec2 resolution;
 uniform float time;
-uniform float timex;
 uniform float F11;   // Float uniform for /osc/float
 uniform float F12;   // Float uniform for /osc/float
 uniform float F13;   // Float uniform for /osc/float
@@ -18,7 +17,7 @@ void main() {
     
     // Use oscInt to influence brightness (scaling factor)
     vec3 colorGrid = vec3(uv.x, uv.y, 0.0);
-    vec3 color = vec3(F11, F12, F13);
+    vec3 color = vec3(F11*cos(time/7.0), F12, F13*sin(time/5.0));
     
     gl_FragColor = vec4(color, 1.0);
 }

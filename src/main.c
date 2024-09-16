@@ -93,7 +93,7 @@ int main(void) {
         totalTime += GetFrameTime();
         mousePos = GetMousePosition();
 
-        //updateShaderValues(shader, mousePos, totalTime);
+        updateShaderValues(pShader, mousePos, totalTime);
 
         //UpdateTexture(audioTexture, fftInputFloat);
         //UpdateTexture(messageTexture, messageFloats);

@@ -39,10 +39,12 @@ void loadShaderWithReloading(const char *fragShaderFileName, long *fragShaderFil
 }
 
 // Function to update shader values for time and mouse
-void updateShaderValues(Shader shader, Vector2 mousePos, float totalTime) {
+void updateShaderValues(Shader* pShader, Vector2 mousePos, float totalTime) {
     // Update mouse position uniform
-    SetShaderValue(shader, mouseLoc, &mousePos, SHADER_UNIFORM_VEC2);
+    mouseLoc = GetShaderLocation(*pShader, "mouse");
+    SetShaderValue(*pShader, mouseLoc, &mousePos, SHADER_UNIFORM_VEC2);
 
     // Update time uniform
-    SetShaderValue(shader, timeLoc, &totalTime, SHADER_UNIFORM_FLOAT);
+    timeLoc = GetShaderLocation(*pShader, "time");
+    SetShaderValue(*pShader, timeLoc, &totalTime, SHADER_UNIFORM_FLOAT);
 }
