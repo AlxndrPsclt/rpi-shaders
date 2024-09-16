@@ -17,7 +17,7 @@ void main() {
     
     // Use oscInt to influence brightness (scaling factor)
     vec3 colorGrid = vec3(uv.x, uv.y, 0.0);
-    vec3 color = vec3(F11*cos(time/7.0), F12, F13*sin(time/5.0));
+    vec3 color = vec3(F11*abs(cos(time/3.0)), F12, F13*abs(sin(time/0.5)));
     
     gl_FragColor = vec4(color, 1.0);
 }

@@ -49,11 +49,6 @@ int main(void) {
 
     loadShaderWithReloading(TextFormat(fragShaderFileName, GLSL_VERSION), &fragShaderFileModTime, pShader, resolution);
 
-    int resolutionLoc = GetShaderLocation(shader, "resolution");
-
-    // Set the resolution uniform (this is essential to reset after reloading)
-    SetShaderValue(shader, resolutionLoc, resolution, SHADER_UNIFORM_VEC2);
-
     if (shader.id == 0) {
         printf("Failed to load shader: %s\n", fragShaderFileName);
     }
@@ -61,10 +56,6 @@ int main(void) {
     Vector2 mousePos = { 0.0f, 0.0f };
     float totalTime = 0.0f;
 
-//    int testTimeLoc = GetShaderLocation(shader, "timex");
-//    printf("testTimeLoc main shaderLocation: %d\n", testTimeLoc);
-
-    printIntArray(shader.locs, 10);
     //int audioTextureLoc = GetShaderLocation(shader, "texture3");
     //printf("audioTexture main shaderLocation: %i\n", audioTextureLoc);
     //int messageTextureLoc = GetShaderLocation(shader, "texture4");
@@ -103,6 +94,7 @@ int main(void) {
             OSCMessage oscMessage = dequeueOSCMessage();
             uniformLocation = GetShaderLocation(shader, oscMessage.path);
             SetShaderValue(shader, uniformLocation, &oscMessage.value, SHADER_UNIFORM_FLOAT);
+            storeUniformValue(oscMessage.path, oscMessage.value);
         }
 
         // Rendering
