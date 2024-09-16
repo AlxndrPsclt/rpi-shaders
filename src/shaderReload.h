@@ -3,10 +3,14 @@
 
 #include "raylib.h"
 
-// Function to load or reload the shader and reset the necessary uniforms
-Shader loadShaderWithReloading(const char *fragShaderFileName, long *fragShaderFileModTime, Shader currentShader, int *uniformLocations, float resolution[2]);
+// Function to load or reload the shader based on file modification time
+void loadShaderWithReloading(const char *fragShaderFileName, long *fragShaderFileModTime, Shader* currentShader, float resolution[2]);
 
-// Function to update all shader values at once
-void updateShaderValues(Shader shader, int *uniformLocations, float oscFloat, int oscInt, float *oscVec3, Vector2 mousePos, float totalTime);
+// Function to update shader values for time and mouse
+void updateShaderValues(Shader shader, Vector2 mousePos, float totalTime);
+
+// Uniform location variables for time and mouse
+// extern int timeLoc;
+// extern int mouseLoc;
 
 #endif // SHADER_RELOAD_H
