@@ -11,18 +11,8 @@
     #define GLSL_VERSION            100
 #endif
 
-void printIntArray(int* pArray, int size) {
-    printf("[");
-    for (int i = 0; i < size; i++) {
-        printf("%d", pArray[i]);  // Access each element
-        if (i < size - 1) {
-            printf(", ");
-        }
-    }
-    printf("]\n");
-}
-
 int main(void) {
+    SetTraceLogLevel(LOG_DEBUG);
     const int screenWidth = 1920;
     const int screenHeight = 1080;
     float resolution[2] = { (float)screenWidth, (float)screenHeight };  // Define resolution first
@@ -44,14 +34,27 @@ int main(void) {
     Shader shader;
     Shader* pShader = &shader;
 
+
     time_t fragShaderFileModTime;
     const char *fragShaderFileName = "resources/shaders/glsl%i/myshader.glsl";
 
     loadShaderWithReloading(TextFormat(fragShaderFileName, GLSL_VERSION), &fragShaderFileModTime, pShader, resolution);
 
+    int prevFrameLoc = GetShaderLocation(shader, "texture0");
+    printf("prevFrameLoc = %d\n", prevFrameLoc);
+
     if (shader.id == 0) {
         printf("Failed to load shader: %s\n", fragShaderFileName);
     }
+
+    Texture2D testTexture = LoadTexture("img.png");
+    printf("texture = %d\n", testTexture.id);
+    RenderTexture2D prevFrame = LoadRenderTexture(resolution[0], resolution[1]);
+    RenderTexture2D currentFrame = LoadRenderTexture(resolution[0], resolution[1]);
+
+//    BeginTextureMode(prevFrame);
+//        ClearBackground(BLACK);  // Make sure the first frame starts with a black texture
+//    EndTextureMode();
 
     Vector2 mousePos = { 0.0f, 0.0f };
     float totalTime = 0.0f;
@@ -97,16 +100,35 @@ int main(void) {
             storeUniformValue(oscMessage.path, oscMessage.value);
         }
 
-        // Rendering
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
+        prevFrameLoc = GetShaderLocation(shader, "texture0");
+        printf("prevFrameLoc = %d\n", prevFrameLoc);
+        //SetShaderValueTexture(shader, prevFrameLoc, testTexture);
+        //SetShaderValue(shader, prevFrameLoc, &testTexture.id, SHADER_UNIFORM_SAMPLER2D);
+
+        BeginTextureMode(currentFrame);
+            ClearBackground(BLACK);  // Clear to black or any desired color
             BeginShaderMode(shader);
-                DrawRectangle(0, 0, screenWidth, screenHeight, BLACK);
+                DrawRectangle(0, 0, screenWidth, screenHeight, WHITE);
             EndShaderMode();
+        EndTextureMode();
+
+        BeginDrawing();
+            ClearBackground(BLACK);
+            DrawTextureRec(currentFrame.texture, (Rectangle){ 0, 0, (float)currentFrame.texture.width, (float)-currentFrame.texture.height }, (Vector2){ 0, 0 }, WHITE);
         EndDrawing();
+
+
+        BeginTextureMode(prevFrame);
+            ClearBackground(BLACK);
+            DrawTextureRec(currentFrame.texture, 
+                (Rectangle){ 0, 0, (float)currentFrame.texture.width, (float)-currentFrame.texture.height },
+                (Vector2){ 0, 0 }, BLACK);
+        EndTextureMode();
     }
 
     // Cleanup
+    UnloadRenderTexture(currentFrame);
+    UnloadRenderTexture(prevFrame);
     UnloadShader(shader);
     //UnloadTexture(audioTexture);
     //UnloadTexture(messageTexture);
