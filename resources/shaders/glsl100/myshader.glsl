@@ -33,6 +33,6 @@ void main() {
     vec3 colorGrid = vec3(uv.x, uv.y, 0.0);
     vec3 color = vec3(F11, F12, F13);
     
-    gl_FragColor = vec4(prevColor.xyz +color+point, 1.0);
+    gl_FragColor = vec4(2.0*prevColor.xyz +color+point, 1.0);
 }
 

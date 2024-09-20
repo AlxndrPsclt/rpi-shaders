@@ -40,7 +40,7 @@ int main(void) {
 
     loadShaderWithReloading(TextFormat(fragShaderFileName, GLSL_VERSION), &fragShaderFileModTime, pShader, resolution);
 
-    int prevFrameLoc = GetShaderLocation(shader, "texture0");
+    int prevFrameLoc = GetShaderLocation(shader, "prevFrame");
     printf("prevFrameLoc = %d\n", prevFrameLoc);
 
     if (shader.id == 0) {
@@ -100,29 +100,29 @@ int main(void) {
             storeUniformValue(oscMessage.path, oscMessage.value);
         }
 
-        prevFrameLoc = GetShaderLocation(shader, "texture0");
-        printf("prevFrameLoc = %d\n", prevFrameLoc);
-        //SetShaderValueTexture(shader, prevFrameLoc, testTexture);
+        prevFrameLoc = GetShaderLocation(shader, "prevFrame");
+        //printf("prevFrameLoc = %d\n", prevFrameLoc);
         //SetShaderValue(shader, prevFrameLoc, &testTexture.id, SHADER_UNIFORM_SAMPLER2D);
 
         BeginTextureMode(currentFrame);
-            ClearBackground(BLACK);  // Clear to black or any desired color
+            ClearBackground(RAYWHITE);  // Clear to black or any desired color
             BeginShaderMode(shader);
-                DrawRectangle(0, 0, screenWidth, screenHeight, WHITE);
+                SetShaderValueTexture(shader, prevFrameLoc, prevFrame.texture);
+                DrawRectangle(0, 0, screenWidth, screenHeight, RAYWHITE);
             EndShaderMode();
         EndTextureMode();
 
         BeginDrawing();
-            ClearBackground(BLACK);
-            DrawTextureRec(currentFrame.texture, (Rectangle){ 0, 0, (float)currentFrame.texture.width, (float)-currentFrame.texture.height }, (Vector2){ 0, 0 }, WHITE);
+            ClearBackground(RAYWHITE);
+            DrawTextureRec(currentFrame.texture, (Rectangle){ 0, 0, (float)currentFrame.texture.width, (float)-currentFrame.texture.height }, (Vector2){ 0, 0 }, RAYWHITE);
         EndDrawing();
 
 
         BeginTextureMode(prevFrame);
-            ClearBackground(BLACK);
+            ClearBackground(RAYWHITE);
             DrawTextureRec(currentFrame.texture, 
                 (Rectangle){ 0, 0, (float)currentFrame.texture.width, (float)-currentFrame.texture.height },
-                (Vector2){ 0, 0 }, BLACK);
+                (Vector2){ 0, 0 }, RAYWHITE);
         EndTextureMode();
     }
 
