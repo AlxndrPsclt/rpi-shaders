@@ -40,21 +40,16 @@ int main(void) {
 
     loadShaderWithReloading(TextFormat(fragShaderFileName, GLSL_VERSION), &fragShaderFileModTime, pShader, resolution);
 
-    int prevFrameLoc = GetShaderLocation(shader, "prevFrame");
-    printf("prevFrameLoc = %d\n", prevFrameLoc);
 
     if (shader.id == 0) {
         printf("Failed to load shader: %s\n", fragShaderFileName);
     }
 
-    Texture2D testTexture = LoadTexture("img.png");
-    printf("texture = %d\n", testTexture.id);
+    int prevFrameLoc = GetShaderLocation(shader, "prevFrame");
+    printf("prevFrameLoc = %d\n", prevFrameLoc);
+
     RenderTexture2D prevFrame = LoadRenderTexture(resolution[0], resolution[1]);
     RenderTexture2D currentFrame = LoadRenderTexture(resolution[0], resolution[1]);
-
-//    BeginTextureMode(prevFrame);
-//        ClearBackground(BLACK);  // Make sure the first frame starts with a black texture
-//    EndTextureMode();
 
     Vector2 mousePos = { 0.0f, 0.0f };
     float totalTime = 0.0f;
@@ -101,13 +96,11 @@ int main(void) {
         }
 
         prevFrameLoc = GetShaderLocation(shader, "prevFrame");
-        //printf("prevFrameLoc = %d\n", prevFrameLoc);
-        //SetShaderValue(shader, prevFrameLoc, &testTexture.id, SHADER_UNIFORM_SAMPLER2D);
 
         BeginTextureMode(currentFrame);
             ClearBackground(RAYWHITE);  // Clear to black or any desired color
             BeginShaderMode(shader);
-                SetShaderValueTexture(shader, prevFrameLoc, prevFrame.texture);
+                SetShaderValueTexture(shader, prevFrameLoc, prevFrame.texture); //For some reason it's important to set this shader texture value INSIDE the shader mode!
                 DrawRectangle(0, 0, screenWidth, screenHeight, RAYWHITE);
             EndShaderMode();
         EndTextureMode();
@@ -116,7 +109,6 @@ int main(void) {
             ClearBackground(RAYWHITE);
             DrawTextureRec(currentFrame.texture, (Rectangle){ 0, 0, (float)currentFrame.texture.width, (float)-currentFrame.texture.height }, (Vector2){ 0, 0 }, RAYWHITE);
         EndDrawing();
-
 
         BeginTextureMode(prevFrame);
             ClearBackground(RAYWHITE);

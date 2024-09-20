@@ -1,7 +1,7 @@
 # Major
 
-- Add double buffer rendering to allow for constructive shaders
 - Add a webcam/video/image texture support
+- Add the audio textures back! Make them better
 - Add Non realime rendering to generate HD videos for the inernet
 - Clean shaders utils to have coherent and understandable tools
 - Handle the usual problem with the RPIs networks in the wild; either through a dedicated router, or through a peer2peer network
@@ -19,3 +19,8 @@
 
 - Release the project as soon as possible (^^)
 - Create a product
+
+
+# Done
+
+- Add double buffer rendering to allow for constructive shaders [DONE 2024-09-21]
