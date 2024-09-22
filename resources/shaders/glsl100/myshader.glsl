@@ -67,6 +67,13 @@ void main() {
     vec2 cell= floor(NB_CELLULES*uv);
     //vec2 incellCoord= fract(15.0*uv);
     //vec2 displayCell=smoothstep(0.6,0.7,sin(incellCoord));
+    float saturation = 0.0;
+    for (float i = 0.0; i < 4.0; i += 1.0) {
+      for (float j = 0.0; j < 4.0; j += 1.0) {
+        saturation += length(texture2D(prevFrame, vec2(0.125+0.25*i,0.125+0.25*j)).rgb);
+      }
+    }
+    saturation /= 16.0;
 
     float cs=1.0/NB_CELLULES;
     vec4 prevColorN = texture2D(prevFrame, uv+vec2(0.0,cs));
@@ -97,5 +104,5 @@ void main() {
     vec3 color = vec3(F11, F12, F13);
     
     vec4 finalColor = vec4((1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+0.01*sin(time)*(pointVoisinEN+pointVoisinWS+pointVoisinWN+pointVoisinES);
-    gl_FragColor = vec4(finalColor.xyz, 1.0);
+    gl_FragColor = vec4((1.0-smoothstep(1.0,1.74,saturation))*finalColor.xyz, 1.0);
 }
