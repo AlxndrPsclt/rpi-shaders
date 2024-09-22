@@ -68,12 +68,14 @@ void main() {
     //vec2 incellCoord= fract(15.0*uv);
     //vec2 displayCell=smoothstep(0.6,0.7,sin(incellCoord));
     float saturation = 0.0;
+    vec3 voisins = vec3(0.0);
     for (float i = 0.0; i < 4.0; i += 1.0) {
       for (float j = 0.0; j < 4.0; j += 1.0) {
-        saturation += length(texture2D(prevFrame, vec2(0.125+0.25*i,0.125+0.25*j)).rgb);
+        voisins += texture2D(prevFrame, vec2(0.125+0.25*i,0.125+0.25*j)).rgb;
       }
     }
-    saturation /= 16.0;
+    voisins /= 16.0;
+    saturation = length(voisins);
 
     float cs=1.0/NB_CELLULES;
     vec4 prevColorN = texture2D(prevFrame, uv+vec2(0.0,cs));
@@ -97,15 +99,32 @@ void main() {
     float composanteG = (prevColorN.g + prevColorNE.g + prevColorE.g + prevColorSW.g)/4.0;
     float composanteB = (prevColorNW.b + prevColorNE.b + prevColorE.b + prevColorS.b)/4.0;
 
-    vec4 pointBinaire = vec4(randomFF(composanteR), randomFF(composanteG), randomFF(composanteB), 1.0);
+    vec4 pointBinaire = vec4(composanteR, composanteG, composanteB, 1.0);
     
     // Use oscInt to influence brightness (scaling factor)
     vec3 colorGrid = vec3(uv.x, uv.y, 0.0);
     vec3 color = vec3(F11, F12, F13);
     
-    vec4 finalColor = vec4((1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+0.06*sin(time)*(pointVoisinEN+pointVoisinWS+pointVoisinWN+pointVoisinES);
+    vec4 finalColor = vec4((1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+0.06*noise(time)*(pointVoisinEN+pointVoisinWS+pointVoisinWN+pointVoisinES);
     finalColor= vec4(step(0.1,length(finalColor.rgb))*finalColor.rgb, 1.0);
     float sstepSaturation =smoothstep(1.5,1.74,saturation);
     float stepSaturation =step(1.3,saturation);
-    gl_FragColor = vec4((1.0-sstepSaturation)*finalColor.rgb- stepSaturation*pointBinaire.rgb, 1.0);
+
+
+//G vR ->R
+//B vG ->G
+//R vB ->B
+//
+//G vG ->B
+//B vB ->R
+//R vR ->G
+
+    vec3 normalizedV = normalize(finalColor.rgb);
+    // Diagonal direction of the cube
+    vec3 diagonal = normalize(vec3(1.0, 1.0, 1.0));
+
+    // Calculate the dot product between normalizedV and diagonal
+    float alignment = dot(normalizedV, diagonal);
+
+    gl_FragColor = vec4((1.0-sstepSaturation)*finalColor.rgb- 2.0*(alignment)*pointBinaire.rgb, 1.0);
 }
