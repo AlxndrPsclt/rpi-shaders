@@ -81,6 +81,8 @@ void main() {
     float point = step(courbeExp(F19),randomFF(randomFF(cell.x)+randomFF(cell.y)*floor(time)));
     vec4 pointVoisinEN = mix(prevColorE,prevColorN,0.5);
     vec4 pointVoisinWS = mix(prevColorW,prevColorS,0.5);
+    vec4 pointVoisinWN = mix(prevColorW,prevColorN,0.5);
+    vec4 pointVoisinES = mix(prevColorE,prevColorS,0.5);
     //float point = step(courbeExp(F19),randomFF(randomFF(floor(100.0*(1.0+3.0*F17)*uv.x))+randomFF(floor(100.0*(1.0+3.0*F18)*uv.y))*floor(time)));
     //float point = step(courbeExp(F19),randomFF(randomFF(floor(100.0*(1.0+3.0*F17)*uv.x))+randomFF(floor(100.0*(1.0+3.0*F18)*uv.y))*floor(time)));
 
@@ -94,7 +96,6 @@ void main() {
     vec3 colorGrid = vec3(uv.x, uv.y, 0.0);
     vec3 color = vec3(F11, F12, F13);
     
-    //gl_FragColor = vec4((1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+pointVoisinEN*0.05-pointVoisinWS*0.05;
-    gl_FragColor = vec4(0.0*(1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+pointBinaire;
+    vec4 finalColor = vec4((1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+0.01*sin(time)*(pointVoisinEN+pointVoisinWS+pointVoisinWN+pointVoisinES);
+    gl_FragColor = vec4(finalColor.xyz, 1.0);
 }
-
