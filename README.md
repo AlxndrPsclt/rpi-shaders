@@ -11,7 +11,7 @@ This project is a minimalist GLSL sandbox designed to run shaders in real-time. 
 ## Requirements
 
 ### System Setup
-The sandbox was developed on **Alpine Linux** for **Raspberry Pi 4**, but it can potentially work on other Linux distributions, as well as on other platforms such as macOS or desktop Linux environments.
+The sandbox was developed on **Alpine Linux** for **Raspberry Pi 4**, but it can potentially work on other Linux distributions, as well as on other platforms such as other Linux environments (not tested and not supported officially).
 
 ### Dependencies
 You need to install the following packages and libraries depending on your system:
@@ -22,13 +22,13 @@ You need to install the following packages and libraries depending on your syste
 apk add build-base gcc git raylib-dev fftw-dev alsa-lib-dev
 ```
 
-#### For Debian-based systems (e.g., Ubuntu, Raspberry Pi OS):
+#### For Debian-based systems (e.g., Ubuntu, Raspberry Pi OS) (untested and not supported officially!):
 ```sh
 sudo apt update
 sudo apt install build-essential gcc git libfftw3-dev libraylib-dev libasound2-dev
 ```
 
-#### For other Linux distributions or macOS:
+#### For other Linux distributions (untested and not supported officially!):
 Use your respective package manager to install:
 - GCC (or an equivalent C compiler)
 - FFTW3 development libraries
@@ -58,32 +58,6 @@ make PLATFORM=DESKTOP
 After compilation, the output binary will be placed in the `build/` directory. To run the sandbox:
 ```sh
 ./build/myshader
-```
-
-## Folder Structure
-```
-/project-root
-│
-├── /src            # Source code (.c and .h files)
-│   ├── audio.c
-│   ├── audio.h
-│   ├── shader.c
-│   ├── shader.h
-│   ├── textures.c
-│   ├── textures.h
-│   └── main.c
-│
-├── /include        # External headers, e.g., miniaudio.h
-│   └── miniaudio.h
-│
-├── /resources      # Resources such as shaders
-│   └── shaders
-│       └── myshader.glsl
-│
-├── /build          # Compiled binaries and object files
-│   └── myshader
-├── Makefile
-└── README.md
 ```
 
 ## Adding or Modifying Shaders
@@ -126,7 +100,3 @@ After compilation, the output binary will be placed in the `build/` directory. T
 
 ## License
 This project is licensed under the MIT License. See the [MIT-LICENSE.txt](./MIT-LICENSE.txt) file for details.
-```
-
-### Changes and Additions:
-- This file now contains all necessary information: introduction, features, requirements, instructions on installing dependencies, how to compile the project, the folder structure, and detailed steps to modify or add shaders.
