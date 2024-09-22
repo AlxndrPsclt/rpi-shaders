@@ -126,5 +126,5 @@ void main() {
     // Calculate the dot product between normalizedV and diagonal
     float alignment = dot(normalizedV, diagonal);
 
-    gl_FragColor = vec4((1.0-sstepSaturation)*finalColor.rgb- 2.0*(alignment)*pointBinaire.rgb, 1.0);
+    gl_FragColor = vec4((1.0-sstepSaturation)*finalColor.rgb- 2.0*(courbeExp(alignment))*pointBinaire.rgb, 1.0);
 }
