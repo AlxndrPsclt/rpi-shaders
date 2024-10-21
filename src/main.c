@@ -2,8 +2,8 @@
 #include "audio.h"
 #include "textures.h"
 #include "osc.h"
+#include "utils.h"
 #include "shaderReload.h"  // Include shader reloading and update function
-#include <time.h>
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
@@ -90,7 +90,8 @@ int main(void) {
         // Dequeue OSC messages and update shader uniforms
         while (ck_ring_size(&oscQueue.ring) > 0) {
             OSCMessage oscMessage = dequeueOSCMessage();
-            uniformLocation = GetShaderLocation(shader, oscMessage.path);
+            char* oscMessage_path = replace_slash_with_underscore(oscMessage.path);
+            uniformLocation = GetShaderLocation(shader, oscMessage_path);
             SetShaderValue(shader, uniformLocation, &oscMessage.value, SHADER_UNIFORM_FLOAT);
             storeUniformValue(oscMessage.path, oscMessage.value);
         }

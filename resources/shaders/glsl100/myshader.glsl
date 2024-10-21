@@ -4,16 +4,16 @@ precision mediump float;
 
 uniform vec2 resolution;
 uniform float time;
-uniform float F11;   // Float uniform for /osc/float
-uniform float F12;   // Float uniform for /osc/float
-uniform float F13;   // Float uniform for /osc/float
-uniform float F14;   // Float uniform for /osc/float
-uniform float F15;   // Float uniform for /osc/float
-uniform float F16;   // Float uniform for /osc/float
-uniform float F17;   // Float uniform for /osc/float
-uniform float F18;   // Float uniform for /osc/float
-uniform float F19;   // Float uniform for /osc/float
-uniform float F21;   // Float uniform for /osc/float
+uniform float zeroctl_F11;   // Float uniform for /osc/float
+uniform float zeroctl_F12;   // Float uniform for /osc/float
+uniform float zeroctl_F13;   // Float uniform for /osc/float
+uniform float zeroctl_F14;   // Float uniform for /osc/float
+uniform float zeroctl_F15;   // Float uniform for /osc/float
+uniform float zeroctl_F16;   // Float uniform for /osc/float
+uniform float zeroctl_F17;   // Float uniform for /osc/float
+uniform float zeroctl_F18;   // Float uniform for /osc/float
+uniform float zeroctl_F19;   // Float uniform for /osc/float
+uniform float zeroctl_F21;   // Float uniform for /osc/float
 uniform sampler2D prevFrame;
 
 const float PI = 3.1415926535897932384626433;
@@ -55,6 +55,17 @@ float courbeExp(float x) {
 }
 
 void main() {
+    float F11=zeroctl_F11;
+    float F12=zeroctl_F12;
+    float F13=zeroctl_F13;
+    float F14=zeroctl_F14;
+    float F15=zeroctl_F15;
+    float F16=zeroctl_F16;
+    float F17=zeroctl_F17;
+    float F18=zeroctl_F18;
+    float F19=zeroctl_F19;
+    float F21=zeroctl_F21;
+
     vec2 uv = (gl_FragCoord.xy / resolution.xy);  // Normalize the screen coordinates
     vec2 uvScaled =(uv-vec2(0.5, 0.5));
                                                  
