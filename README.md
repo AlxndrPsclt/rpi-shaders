@@ -1,6 +1,6 @@
 # GLSL Sandbox for Real-Time Shader Rendering
 
-This project is a minimalist GLSL sandbox designed to run shaders in real-time. It captures audio input, performs FFT analysis, and allows the results to interact with shaders. The sandbox is lightweight and flexible, initially developed and tested for a **Raspberry Pi 4** running **headless Alpine Linux**. However, it should work on other platforms and operating systems with minimal changes.
+This project is a minimalist GLSL sandbox designed to run shaders in real-time. It captures audio input, performs FFT analysis, and allows the results to interact with shaders. The sandbox is lightweight and flexible, initially developed and tested for a **Raspberry Pi 4** running **headless Diskless Alpine Linux**.
 
 ## Features
 - Real-time shader rendering using `raylib`.
@@ -19,7 +19,7 @@ You need to install the following packages and libraries depending on your syste
 #### For Alpine Linux:
 ```sh
 # Install build tools and dependencies
-apk add build-base gcc git raylib-dev fftw-dev alsa-lib-dev
+apk add build-base gcc git raylib-dev fftw-dev alsa-lib-dev ck-dev uthash-dev liblo-dev mesa-dri-gallium
 ```
 
 #### For Debian-based systems (e.g., Ubuntu, Raspberry Pi OS) (untested and not supported officially!):
