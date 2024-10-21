@@ -1,24 +1,44 @@
 #!/usr/bin/env sh
 
-# Define a list of IP addresses (space-separated string)
-MACHINES="192.168.43.250 192.168.8.127 192.168.8.128 192.168.8.129 192.168.8.117"
+#!/usr/bin/env sh
 
-# Use fzf to select the target IP address
-TARGET_IP=$(echo "$MACHINES" | tr ' ' '\n' | fzf --prompt="Select target IP: ")
+# Define a list of machines
+MACHINES="all simgen001.local simgen002.local simgen003.local simgen004.local"
 
-# Check if an IP address was selected
-if [ -z "$TARGET_IP" ]; then
-  echo "No IP address selected. Exiting."
+# Prompt user to select a target using fzf
+echo "Available machines: $MACHINES"
+TARGET=$(echo "$MACHINES" | tr ' ' '\n' | fzf --prompt="Select target (or 'all' to sync all): ")
+
+# Check if the user selected a target
+if [ -z "$TARGET" ]; then
+  echo "No target selected. Exiting."
   exit 1
 fi
 
-# Run the rsync command with the selected IP address
-rsync -rvz -e ssh --exclude-from='.rsyncignore' --progress "$(pwd)/" "alex@$TARGET_IP:/home/alex/shaders/"
+# Define rsync command
+RSYNC_CMD="rsync -rvz -e ssh --delete --exclude-from=.rsyncignore --progress $(pwd)/ alex@"
 
-# Confirm the sync was successful
-if [ $? -eq 0 ]; then
-  echo "Sync to $TARGET_IP completed successfully."
+# If 'all' is selected, iterate over all machines
+if [ "$TARGET" = "all" ]; then
+  echo "Syncing with all machines..."
+  for machine in $MACHINES; do
+    [ "$machine" = "all" ] && continue
+    echo "Syncing with $machine..."
+    $RSYNC_CMD"$machine:/home/alex/rpi-shaders/"
+    if [ $? -eq 0 ]; then
+      echo "Sync to $machine completed successfully."
+    else
+      echo "Sync to $machine failed."
+    fi
+  done
 else
-  echo "Sync to $TARGET_IP failed."
+  # Sync with selected machine
+  echo "Syncing with $TARGET..."
+  $RSYNC_CMD"$TARGET:/home/alex/rpi-shaders/"
+  if [ $? -eq 0 ]; then
+    echo "Sync to $TARGET completed successfully."
+  else
+    echo "Sync to $TARGET failed."
+  fi
 fi
 
