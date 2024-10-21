@@ -16,7 +16,7 @@ if [ -z "$TARGET" ]; then
 fi
 
 # Define rsync command
-RSYNC_CMD="rsync -rvz -e ssh --delete --exclude-from=.rsyncignore --progress $(pwd)/ alex@"
+RSYNC_CMD="rsync -rvz -e ssh --exclude-from=.rsyncignore --delete --progress $(pwd)/ alex@"
 
 # If 'all' is selected, iterate over all machines
 if [ "$TARGET" = "all" ]; then
