@@ -8,8 +8,10 @@
 
 typedef struct {
     char path[MAX_PATH_SIZE];  // Path (minus the '/')
-    float value;               // Value
+    float values[4];           // Array of values (supporting up to 8 floats)
+    int value_count;           // Number of arguments
 } __attribute__((aligned(8))) OSCMessage;
+
 
 // Queue structure
 typedef struct {

@@ -35,7 +35,7 @@ OSCMessage dequeueOSCMessage() {
     OSCMessage *message;
     if (!ck_ring_dequeue_mpmc(&oscQueue.ring, oscQueue.buffer, (void **)&message)) {
         printf("Queue empty\n");
-        OSCMessage emptyMessage = { .path = "", .value = 0.0f };
+        OSCMessage emptyMessage = { .path = "", .values = {0.0f}, .value_count = 0 };
         return emptyMessage;
     }
 
@@ -45,14 +45,32 @@ OSCMessage dequeueOSCMessage() {
 }
 
 int oscHandler(const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data) {
+    if (argc < 1 || argc > 4) {
+        printf("Error: Only 1 to 4 float arguments are supported.\n");
+        return 1;  // Exit if argument count is outside of 1–4
+    }
+
     OSCMessage oscMessage;
     snprintf(oscMessage.path, MAX_PATH_SIZE, "%s", path + 1);  // Skip the leading '/'
-    oscMessage.value = argv[0]->f;
+    
+    oscMessage.value_count = argc;  // Store the number of arguments
 
-    printf("Recieved an OSC message at path: %s whith content: %f\n", oscMessage.path, oscMessage.value);
-    enqueueOSCMessage(oscMessage);
+    // Store up to 4 float arguments
+    for (int i = 0; i < argc; i++) {
+        if (types[i] == 'f') {  // Ensure the argument is a float
+            oscMessage.values[i] = argv[i]->f;
+        } else {
+            printf("Unsupported argument type: %c\n", types[i]);
+            return 1;
+        }
+    }
+
+    printf("Received an OSC message at path: %s with %d float(s)\n", oscMessage.path, oscMessage.value_count);
+    enqueueOSCMessage(oscMessage);  // Add the message to the queue
     return 0;
 }
+
+
 
 void startOscServer() {
     // Create OSC server on the specified port, bind to all interfaces (0.0.0.0)

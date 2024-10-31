@@ -11,8 +11,8 @@ int mouseLoc = -1;
 // Global hash table for storing uniform values
 UniformCache *uniformCache = NULL;
 
-// Store the last value of the uniform in the hash table
-void storeUniformValue(const char *path, float value) {
+// Store the last values of the uniform in the hash table (up to 4 floats)
+void storeUniformValue(const char *path, const float *values, int value_count) {
     UniformCache *entry;
 
     // Check if the uniform is already in the cache
@@ -22,13 +22,16 @@ void storeUniformValue(const char *path, float value) {
         // Uniform not found, add it to the cache
         entry = (UniformCache *)malloc(sizeof(UniformCache));
         strncpy(entry->path, path, MAX_PATH_SIZE);
-        entry->value = value;
+        entry->value_count = value_count;  // Set the number of values
+        memcpy(entry->values, values, value_count * sizeof(float));  // Copy the values
         HASH_ADD_STR(uniformCache, path, entry);
     } else {
-        // Update the existing value
-        entry->value = value;
+        // Update the existing values
+        entry->value_count = value_count;  // Update the number of values
+        memcpy(entry->values, values, value_count * sizeof(float));  // Copy the new values
     }
 }
+
 
 // Restore uniform values on shader reload
 void restoreUniformValues(Shader *pShader) {
@@ -37,10 +40,32 @@ void restoreUniformValues(Shader *pShader) {
     // Iterate over the cache and set uniform values in the shader
     HASH_ITER(hh, uniformCache, entry, tmp) {
         int uniformLocation = GetShaderLocation(*pShader, entry->path);
-        SetShaderValue(*pShader, uniformLocation, &entry->value, SHADER_UNIFORM_FLOAT);
-        printf("Restored uniform %s with value %f\n", entry->path, entry->value);
+
+        // Apply based on the number of values stored
+        switch (entry->value_count) {
+            case 1:  // Single float
+                SetShaderValue(*pShader, uniformLocation, entry->values, SHADER_UNIFORM_FLOAT);
+                printf("Restored uniform %s with value %f\n", entry->path, entry->values[0]);
+                break;
+            case 2:  // vec2
+                SetShaderValue(*pShader, uniformLocation, entry->values, SHADER_UNIFORM_VEC2);
+                printf("Restored uniform %s with values %f, %f\n", entry->path, entry->values[0], entry->values[1]);
+                break;
+            case 3:  // vec3
+                SetShaderValue(*pShader, uniformLocation, entry->values, SHADER_UNIFORM_VEC3);
+                printf("Restored uniform %s with values %f, %f, %f\n", entry->path, entry->values[0], entry->values[1], entry->values[2]);
+                break;
+            case 4:  // vec4
+                SetShaderValue(*pShader, uniformLocation, entry->values, SHADER_UNIFORM_VEC4);
+                printf("Restored uniform %s with values %f, %f, %f, %f\n", entry->path, entry->values[0], entry->values[1], entry->values[2], entry->values[3]);
+                break;
+            default:
+                printf("Error: Unsupported value count: %d for path: %s\n", entry->value_count, entry->path);
+                break;
+        }
     }
 }
+
 
 // Function to load or reload the shader and restore uniform values
 void loadShaderWithReloading(const char *fragShaderFileName, long *fragShaderFileModTime, Shader* pCurrentShader, float resolution[2]) {

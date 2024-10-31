@@ -14,6 +14,7 @@ uniform float zeroctl_F17;   // Float uniform for /osc/float
 uniform float zeroctl_F18;   // Float uniform for /osc/float
 uniform float zeroctl_F19;   // Float uniform for /osc/float
 uniform float zeroctl_F21;   // Float uniform for /osc/float
+uniform vec3 accelerometer;   // Float uniform for /osc/float
 uniform sampler2D prevFrame;
 
 const float PI = 3.1415926535897932384626433;
@@ -67,17 +68,24 @@ void main() {
     float F21=zeroctl_F21;
 
     vec2 uv = (gl_FragCoord.xy / resolution.xy);  // Normalize the screen coordinates
+    uv+= accelerometer.xy/10.0;
+    vec2 uvScaled =(uv-vec2(0.5, 0.5));
+                                                 
     //vec2 uvtex = (gl_FragCoord.xy - vec2(F14,F15) / resolution.xy);  // Normalize the screen coordinates
+    vec2 cell= floor(NB_CELLULES*uvScaled);
+    vec2 uvScaledCell =(uv-(cell+0.5))*F17*1.0;
+    vec2 cellCentered= floor(NB_CELLULES*uvScaledCell);
     
     float dispX = F15*F15*F15*F15;
     float dispY = F16*F16*F16*F16;
-    vec4 prevColor = texture2D(prevFrame, uv-vec2(dispX,dispY));
+    vec4 prevColor = texture2D(prevFrame, uvScaled-vec2(dispX,dispY));
     // Use oscFloat to adjust the color based on time
     //vec3 color = vec3(F11 * uv.x, F12 * uv.y, abs(sin(time * F13)));
 
-    vec2 cell= floor(NB_CELLULES*uv);
-    //vec2 incellCoord= fract(15.0*uv);
-    //vec2 displayCell=smoothstep(0.6,0.7,sin(incellCoord));
+
+    vec2 incellCoord= fract(15.0*uv);
+    ///vec2 displayCell=smoothstep(0.6,0.7,sin(incellCoord));
+
     float saturation = 0.0;
     vec3 voisins = vec3(0.0);
     for (float i = 0.0; i < 4.0; i += 1.0) {
@@ -137,5 +145,15 @@ void main() {
     // Calculate the dot product between normalizedV and diagonal
     float alignment = dot(normalizedV, diagonal);
 
-    gl_FragColor = vec4((1.0-sstepSaturation)*finalColor.rgb- 2.0*(courbeExp(alignment))*pointBinaire.rgb, 1.0);
+    //
+
+    vec3 finalColor3 =(1.0-sstepSaturation)*finalColor.rgb- 2.0*(courbeExp(alignment))*pointBinaire.rgb;
+
+    normalizedV = normalize(finalColor3);
+    alignment = dot(normalizedV, diagonal);
+    float point2 = step(courbeExp(F19),randomFF(randomFF(3.0*cellCentered.x*fract(uv.x))+randomFF(3.0*cellCentered.y*fract(uv.y))*floor(time)));
+
+    finalColor3 -= (courbeExp(alignment))*point2*vec3(0.3*randomFF(uv.x*sin(time)), 0.1*randomFF(uv.y*cos(time)),0.7*randomFF(uv.y*tan(time)));
+
+    gl_FragColor = vec4(finalColor3, 1.0);
 }

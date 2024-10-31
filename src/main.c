@@ -91,10 +91,32 @@ int main(void) {
         while (ck_ring_size(&oscQueue.ring) > 0) {
             OSCMessage oscMessage = dequeueOSCMessage();
             char* oscMessage_path = replace_slash_with_underscore(oscMessage.path);
+
             uniformLocation = GetShaderLocation(shader, oscMessage_path);
-            SetShaderValue(shader, uniformLocation, &oscMessage.value, SHADER_UNIFORM_FLOAT);
-            storeUniformValue(oscMessage.path, oscMessage.value);
+
+            // Apply based on the number of arguments
+            switch (oscMessage.value_count) {
+                case 1:  // Single float
+                    SetShaderValue(shader, uniformLocation, &oscMessage.values[0], SHADER_UNIFORM_FLOAT);
+                    break;
+                case 2:  // vec2
+                    SetShaderValue(shader, uniformLocation, oscMessage.values, SHADER_UNIFORM_VEC2);
+                    break;
+                case 3:  // vec3
+                    SetShaderValue(shader, uniformLocation, oscMessage.values, SHADER_UNIFORM_VEC3);
+                    break;
+                case 4:  // vec4
+                    SetShaderValue(shader, uniformLocation, oscMessage.values, SHADER_UNIFORM_VEC4);
+                    break;
+                default:
+                    printf("Error: Unsupported value count: %d\n", oscMessage.value_count);
+                    break;
+            }
+
+            storeUniformValue(oscMessage.path, oscMessage.values, oscMessage.value_count);
+
         }
+
 
         prevFrameLoc = GetShaderLocation(shader, "prevFrame");
 
