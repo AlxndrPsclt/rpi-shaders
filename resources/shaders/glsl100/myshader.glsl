@@ -18,7 +18,7 @@ uniform sampler2D prevFrame;
 
 const float PI = 3.1415926535897932384626433;
 const float DEFAULT_RANDOM_FROM_FLOAT_PARAM = 502000.0;
-const float NB_CELLULES = 100.0;
+const float NB_CELLULES = 200.0;
 
 float randomFromFloat(float seed, float param) {
   return fract(sin(seed) * param);
@@ -74,8 +74,9 @@ void main() {
     vec4 prevColor = texture2D(prevFrame, uv-vec2(dispX,dispY));
     // Use oscFloat to adjust the color based on time
     //vec3 color = vec3(F11 * uv.x, F12 * uv.y, abs(sin(time * F13)));
+    float NB_CELLULES_AJUSTED = floor(NB_CELLULES*F18);
 
-    vec2 cell= floor(NB_CELLULES*uv);
+    vec2 cell= floor(NB_CELLULES_AJUSTED*uv);
     //vec2 incellCoord= fract(15.0*uv);
     //vec2 displayCell=smoothstep(0.6,0.7,sin(incellCoord));
     float saturation = 0.0;
@@ -88,7 +89,7 @@ void main() {
     voisins /= 16.0;
     saturation = length(voisins);
 
-    float cs=1.0/NB_CELLULES;
+    float cs=1.0/NB_CELLULES_AJUSTED;
     vec4 prevColorN = texture2D(prevFrame, uv+vec2(0.0,cs));
     vec4 prevColorNW = texture2D(prevFrame, uv+vec2(-cs,cs));
     vec4 prevColorNE= texture2D(prevFrame, uv+vec2(cs,cs));
