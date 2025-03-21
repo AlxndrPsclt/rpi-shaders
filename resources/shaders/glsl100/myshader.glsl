@@ -152,9 +152,9 @@ void main() {
     vec3 stylusColor = vec3(0.0,0.0,0.0);
     float stylusIn = 1.0;
 
-    if (length < 0.05 + 0.05*smoothstep(0.0,0.7,sin(uv.x*time/2.0))) {
+    if (length < 0.05 + 0.1*noise(uv.x*time*3.0)*smoothstep(0.0,0.7+noise(time),sin(uv.x*time/2.0))) {
         // Inside the circle
-        stylusColor = vec3(tan(time),0.1,0.9);
+        stylusColor = vec3(tan(time*10.0*uv.y),0.1,0.9);
         stylusIn = 0.001;
     } else {
         // Outside the circle
