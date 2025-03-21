@@ -156,7 +156,7 @@ void main() {
     //S = S+vec2(randomFF(uv.x), randomFF(uv.y));
     float length = length(uv-S);
     float angle = dot(uv-S, vec2(0.0,0.0));
-    uv=rotate2d(angle)*uv;
+    uv=rotate2d(4.0*angle*noise(uv.x))*(uv-vec2(noise(uv.x*uv.x), -noise(uv.y/uv.x)));
 
     vec3 stylusColor = vec3(0.0,0.0,0.0);
     float stylusIn = 1.0;
@@ -164,7 +164,7 @@ void main() {
     //if (length * smoothstep(0.1,0.2,randomFF(randomFF(uv.x)+randomFF(uv.y)))< 0.01) {
     //if (length * 3.0*noise(randomFF(uv.x*time)+randomFF(uv.y*time))< 0.01) {
 
-    if (length + sin(angle)*0.01< 0.01 + 0.1*noise(noise(sin(uv.x*uv.y*S.x))/noise(0.5+cos(time/2.0)))) {
+    if (length + sin(uv.y)*0.001< 0.01 + 0.1*noise(noise(sin(uv.x*uv.y*S.x))/(S.y*noise(0.5+cos(time/2.0))))) {
         // Inside the circle
         stylusColor = vec3(0.6,0.1,0.9);
         stylusIn = 0.001;
@@ -176,7 +176,8 @@ void main() {
     //vec3 bgColor = vec3(uv.x,uv.y,0.0);
     vec3 bgColor = vec3(0.0,0.0,0.0);
     //gl_FragColor = vec4(stylusColor+bgColor, 1.0);
-    vec4 prevColorPersistence=prevColor*(0.11*(1.0+cos(time/3.0)/10.0));
+    vec4 prevColorPersistence=prevColor*(0.41*(1.0+cos(time/3.0)/10.0));
+
     float prevRColorSuffle=noise(prevColor.g*prevColor.b*time/10.0);
     float prevGGolorSuffle=abs(noise(sin(prevColor.b)));
     float prevBColorSuffle=noise(prevColor.r*sin(time/10.0));
