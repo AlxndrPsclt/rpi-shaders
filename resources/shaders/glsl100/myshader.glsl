@@ -76,6 +76,7 @@ void main() {
 
     uv = vec2(uv.x+noise(uv.x*(0.9+0.2*randomFF(cos(time))*0.2)), uv.y+0.25);
     
+    
     float dispX = F15*F15*F15*F15;
     float dispY = F16*F16*F16*F16;
     vec4 prevColor = texture2D(prevFrame, uv-vec2(dispX,dispY));
@@ -155,6 +156,7 @@ void main() {
     //S = S+vec2(randomFF(uv.x), randomFF(uv.y));
     float length = length(uv-S);
     float angle = dot(uv-S, vec2(0.0,0.0));
+    uv=rotate2d(angle)*uv;
 
     vec3 stylusColor = vec3(0.0,0.0,0.0);
     float stylusIn = 1.0;
@@ -179,7 +181,7 @@ void main() {
     float prevGGolorSuffle=abs(noise(sin(prevColor.b)));
     float prevBColorSuffle=noise(prevColor.r*sin(time/10.0));
 
-    vec4 prevColorSuffle=2.5*vec4(prevRColorSuffle, prevGGolorSuffle, prevBColorSuffle, 1.0);
+    vec4 prevColorSuffle=1.5*vec4(prevRColorSuffle, prevGGolorSuffle, prevBColorSuffle, 1.0);
 
     //gl_FragColor =  (1.0+cos(time/5.0)*(prevColorPersistence+ prevColorSuffle+ vec4(stylusColor+bgColor, 1.0));
     gl_FragColor =  (prevColorPersistence+ prevColorSuffle+ vec4(stylusColor+bgColor, 1.0));
