@@ -68,15 +68,18 @@ void main() {
     float F19=zeroctl_F19;
     float F21=zeroctl_F21;
     float SX=remarkable_stylus_x/1000000000.0;
-    float SY=remarkable_stylus_y/1000000000.0;
+    float SY=1.0-remarkable_stylus_y/1000000000.0;
     vec2 S=vec2(SX,SY);
 
     vec2 uv = (gl_FragCoord.xy / resolution.xy);  // Normalize the screen coordinates
     //vec2 uvtex = (gl_FragCoord.xy - vec2(F14,F15) / resolution.xy);  // Normalize the screen coordinates
+
+    uv = vec2(uv.x+noise(uv.x)*0.2, uv.y+0.25);
     
     float dispX = F15*F15*F15*F15;
     float dispY = F16*F16*F16*F16;
     vec4 prevColor = texture2D(prevFrame, uv-vec2(dispX,dispY));
+    prevColor = vec4(prevColor.x, prevColor.y, prevColor.z, 1.0);
     // Use oscFloat to adjust the color based on time
     //vec3 color = vec3(F11 * uv.x, F12 * uv.y, abs(sin(time * F13)));
     float NB_CELLULES_AJUSTED = floor(NB_CELLULES*F18);
@@ -147,14 +150,20 @@ void main() {
 
     //gl_FragColor = vec4(stylusValue + (1.0-sstepSaturation)*finalColor.rgb- 2.0*(alignment)*pointBinaire.rgb, 1.0);
     //
+    //
+
+    //S = S+vec2(randomFF(uv.x), randomFF(uv.y));
     float length = length(uv-S);
+    float angle = dot(uv,S);
 
     vec3 stylusColor = vec3(0.0,0.0,0.0);
     float stylusIn = 1.0;
 
-    if (length < 0.05 + 0.1*noise(uv.x*time*3.0)*smoothstep(0.0,0.7+noise(time),sin(uv.x*time/2.0))) {
+    //if (length * smoothstep(0.1,0.2,randomFF(randomFF(uv.x)+randomFF(uv.y)))< 0.01) {
+    //if (length * 3.0*noise(randomFF(uv.x*time)+randomFF(uv.y*time))< 0.01) {
+    if (length < 0.01 + 0.1*noise(sin(uv.x)/cos(uv.y))) {
         // Inside the circle
-        stylusColor = vec3(tan(time*10.0*uv.y),0.1,0.9);
+        stylusColor = vec3(0.6,0.1,0.9);
         stylusIn = 0.001;
     } else {
         // Outside the circle
@@ -162,7 +171,8 @@ void main() {
     }
 
     //vec3 bgColor = vec3(uv.x,uv.y,0.0);
-    vec3 bgColor = vec3(0.2,0.2,0.2);
+    vec3 bgColor = vec3(0.0,0.0,0.0);
     //gl_FragColor = vec4(stylusColor+bgColor, 1.0);
-    gl_FragColor = vec4(stylusIn * (stylusColor+(1.0-sstepSaturation)*finalColor.rgb- 2.0*(alignment)*pointBinaire.rgb), 1.0);
+    gl_FragColor = 3.2*vec4(noise(prevColor.g*prevColor.b*time), noise(prevColor.r*time/2.0), abs(noise(sin(prevColor.b))), 1.0) + vec4(stylusColor+bgColor, 1.0);
+    //gl_FragColor = vec4(bgColor, 1.0);
 }
