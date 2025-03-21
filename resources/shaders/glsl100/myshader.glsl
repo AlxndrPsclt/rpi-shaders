@@ -74,7 +74,7 @@ void main() {
     vec2 uv = (gl_FragCoord.xy / resolution.xy);  // Normalize the screen coordinates
     //vec2 uvtex = (gl_FragCoord.xy - vec2(F14,F15) / resolution.xy);  // Normalize the screen coordinates
 
-    uv = vec2(uv.x+noise(uv.x*(0.9+0.2*randomFF(cos(time))*0.2)), uv.y+0.25);
+    uv = vec2(uv.x+noise(4.0*uv.x*(0.9+0.2*randomFF(cos(time))*0.2)), uv.y+0.25);
     
     
     float dispX = F15*F15*F15*F15;
