@@ -71,10 +71,12 @@ void main() {
     float SY=1.0-remarkable_stylus_y/1000000000.0;
     vec2 S=vec2(SX,SY);
 
+    float timeX = time/100.0;
+
     vec2 uv = (gl_FragCoord.xy / resolution.xy);  // Normalize the screen coordinates
     //vec2 uvtex = (gl_FragCoord.xy - vec2(F14,F15) / resolution.xy);  // Normalize the screen coordinates
 
-    uv = vec2(uv.x+noise(4.0*uv.x*(0.9+0.2*randomFF(cos(time))*0.2)), uv.y+0.25);
+    uv = vec2(uv.x+noise(4.0*uv.x*(0.9+0.2*randomFF(cos(timeX))*0.2)), uv.y+noise(tan(timeX/(10.0*(1.0+cos(timeX))))));
     
     
     float dispX = F15*F15*F15*F15;
@@ -164,7 +166,7 @@ void main() {
     //if (length * smoothstep(0.1,0.2,randomFF(randomFF(uv.x)+randomFF(uv.y)))< 0.01) {
     //if (length * 3.0*noise(randomFF(uv.x*time)+randomFF(uv.y*time))< 0.01) {
 
-    if (length + sin(uv.y)*0.001< 0.01 + 0.1*noise(noise(sin(uv.x*uv.y*S.x))/(S.y*noise(0.5+cos(time/2.0))))) {
+    if (length + sin(uv.y)*0.001< 0.01 + 0.1*noise(noise(sin(uv.x*uv.y*S.x))/(S.y*noise(0.5+cos(timeX/2.0))))) {
         // Inside the circle
         stylusColor = vec3(0.6,0.1,0.9);
         stylusIn = 0.001;
@@ -176,15 +178,15 @@ void main() {
     //vec3 bgColor = vec3(uv.x,uv.y,0.0);
     vec3 bgColor = vec3(0.0,0.0,0.0);
     //gl_FragColor = vec4(stylusColor+bgColor, 1.0);
-    vec4 prevColorPersistence=prevColor*(0.41*(1.0+cos(time/3.0)/10.0));
+    vec4 prevColorPersistence=prevColor*(0.41*(1.0+cos(timeX/3.0)/10.0));
 
-    float prevRColorSuffle=noise(prevColor.g*prevColor.b*time/10.0);
+    float prevRColorSuffle=noise(prevColor.g*prevColor.b*timeX/10.0);
     float prevGGolorSuffle=abs(noise(sin(prevColor.b)));
-    float prevBColorSuffle=noise(prevColor.r*sin(time/10.0));
+    float prevBColorSuffle=noise(prevColor.r*sin(timeX/10.0));
 
     vec4 prevColorSuffle=1.5*vec4(prevRColorSuffle, prevGGolorSuffle, prevBColorSuffle, 1.0);
 
-    //gl_FragColor =  (1.0+cos(time/5.0)*(prevColorPersistence+ prevColorSuffle+ vec4(stylusColor+bgColor, 1.0));
+    //gl_FragColor =  (1.0+cos(timeX/5.0)*(prevColorPersistence+ prevColorSuffle+ vec4(stylusColor+bgColor, 1.0));
     gl_FragColor =  (prevColorPersistence+ prevColorSuffle+ vec4(stylusColor+bgColor, 1.0));
     //gl_FragColor = vec4(bgColor, 1.0);
 }
