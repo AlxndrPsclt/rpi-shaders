@@ -125,7 +125,7 @@ void main() {
     vec3 colorGrid = vec3(uv.x, uv.y, 0.0);
     vec3 color = vec3(F11, F12, F13);
     
-    vec4 finalColor = vec4((1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+0.06*noise(time)*(pointVoisinEN+pointVoisinWS+pointVoisinWN+pointVoisinES);
+    vec4 finalColor = vec4((1.0+F14/10.0)*prevColor.xyz +color*point, 1.0)+0.06*noise(time/10.0)*(pointVoisinEN+pointVoisinWS+pointVoisinWN+pointVoisinES);
     finalColor= vec4(step(0.1,length(finalColor.rgb))*finalColor.rgb, 1.0);
     float sstepSaturation =smoothstep(1.5,1.74,saturation);
     float stepSaturation =step(1.3,saturation);
@@ -154,14 +154,15 @@ void main() {
 
     //S = S+vec2(randomFF(uv.x), randomFF(uv.y));
     float length = length(uv-S);
-    float angle = dot(uv,S);
+    float angle = dot(uv-S, vec2(0.0,0.0));
 
     vec3 stylusColor = vec3(0.0,0.0,0.0);
     float stylusIn = 1.0;
 
     //if (length * smoothstep(0.1,0.2,randomFF(randomFF(uv.x)+randomFF(uv.y)))< 0.01) {
     //if (length * 3.0*noise(randomFF(uv.x*time)+randomFF(uv.y*time))< 0.01) {
-    if (length < 0.01 + 0.1*noise(sin(uv.x)/cos(uv.y))) {
+
+    if (length + sin(angle)*0.01< 0.01 + 0.1*noise(noise(sin(uv.x*uv.y*S.x))/noise(0.5+cos(time/2.0)))) {
         // Inside the circle
         stylusColor = vec3(0.6,0.1,0.9);
         stylusIn = 0.001;
@@ -173,6 +174,7 @@ void main() {
     //vec3 bgColor = vec3(uv.x,uv.y,0.0);
     vec3 bgColor = vec3(0.0,0.0,0.0);
     //gl_FragColor = vec4(stylusColor+bgColor, 1.0);
-    gl_FragColor = 3.2*vec4(noise(prevColor.g*prevColor.b*time), noise(prevColor.r*time/2.0), abs(noise(sin(prevColor.b))), 1.0) + vec4(stylusColor+bgColor, 1.0);
+    vec4 prevColorPersistence=prevColor*(0.11*(1.0+cos(time/3.0)/10.0));
+    gl_FragColor =  prevColorPersistence+ 2.5*vec4(noise(prevColor.g*prevColor.b*time/10.0), noise(prevColor.r*sin(time/10.0)), abs(noise(sin(prevColor.b))), 1.0) + vec4(stylusColor+bgColor, 1.0);
     //gl_FragColor = vec4(bgColor, 1.0);
 }
