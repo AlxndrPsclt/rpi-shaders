@@ -3,7 +3,7 @@
 #!/usr/bin/env sh
 
 # Define a list of machines
-MACHINES="all simgen001.local simgen002.local simgen003.local simgen004.local"
+MACHINES="all simgen001.local simgen002.local simgen003.local simgen004.local simgen005.local 192.168.8.181"
 
 # Prompt user to select a target using fzf
 echo "Available machines: $MACHINES"

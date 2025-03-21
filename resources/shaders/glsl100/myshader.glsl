@@ -14,6 +14,8 @@ uniform float zeroctl_F17;   // Float uniform for /osc/float
 uniform float zeroctl_F18;   // Float uniform for /osc/float
 uniform float zeroctl_F19;   // Float uniform for /osc/float
 uniform float zeroctl_F21;   // Float uniform for /osc/float
+uniform float remarkable_stylus_x;   // Float uniform for /osc/float
+uniform float remarkable_stylus_y;   // Float uniform for /osc/float
 uniform sampler2D prevFrame;
 
 const float PI = 3.1415926535897932384626433;
@@ -65,6 +67,9 @@ void main() {
     float F18=zeroctl_F18;
     float F19=zeroctl_F19;
     float F21=zeroctl_F21;
+    float SX=remarkable_stylus_x/1000000000.0;
+    float SY=remarkable_stylus_y/1000000000.0;
+    vec2 S=vec2(SX,SY);
 
     vec2 uv = (gl_FragCoord.xy / resolution.xy);  // Normalize the screen coordinates
     //vec2 uvtex = (gl_FragCoord.xy - vec2(F14,F15) / resolution.xy);  // Normalize the screen coordinates
@@ -138,5 +143,26 @@ void main() {
     // Calculate the dot product between normalizedV and diagonal
     float alignment = dot(normalizedV, diagonal);
 
-    gl_FragColor = vec4((1.0-sstepSaturation)*finalColor.rgb- 2.0*(alignment)*pointBinaire.rgb, 1.0);
+    float stylusValue = smoothstep(0.1,0.3,(abs(uv.x-SX)));
+
+    //gl_FragColor = vec4(stylusValue + (1.0-sstepSaturation)*finalColor.rgb- 2.0*(alignment)*pointBinaire.rgb, 1.0);
+    //
+    float length = length(uv-S);
+
+    vec3 stylusColor = vec3(0.0,0.0,0.0);
+    float stylusIn = 1.0;
+
+    if (length < 0.05 + 0.05*smoothstep(0.0,0.7,sin(uv.x*time/2.0))) {
+        // Inside the circle
+        stylusColor = vec3(tan(time),0.1,0.9);
+        stylusIn = 0.001;
+    } else {
+        // Outside the circle
+        stylusColor = vec3(0.0,0.0,0.0);
+    }
+
+    //vec3 bgColor = vec3(uv.x,uv.y,0.0);
+    vec3 bgColor = vec3(0.2,0.2,0.2);
+    //gl_FragColor = vec4(stylusColor+bgColor, 1.0);
+    gl_FragColor = vec4(stylusIn * (stylusColor+(1.0-sstepSaturation)*finalColor.rgb- 2.0*(alignment)*pointBinaire.rgb), 1.0);
 }
